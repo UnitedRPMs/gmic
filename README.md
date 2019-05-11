@@ -1,2 +1,7 @@
-# gmic
-GREYC's Magic for Image Computing; yes; we can't wait rebuilds in upstream...
+#           gmic
+
+[![CircleCI](https://circleci.com/gh/UnitedRPMs/gmic.svg?style=svg)](https://circleci.com/gh/UnitedRPMs/gmic)
+ 
+Summary:        GREYC's Magic for Image Computing.
+
+

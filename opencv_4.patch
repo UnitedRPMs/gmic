@@ -1,0 +1,47 @@
+diff -ruN orig/src/CImg.h new/src/CImg.h
+--- orig/src/CImg.h	2019-04-30 03:38:52.000000000 -0600
++++ new/src/CImg.h	2019-05-09 16:37:03.506858000 -0600
+@@ -422,6 +422,7 @@
+ #endif
+ #include <cstddef>
+ #include <opencv2/opencv.hpp>
++#include <opencv2/videoio/videoio_c.h>
+ #if CV_MAJOR_VERSION >=3
+ #define _cimg_fourcc cv::VideoWriter::fourcc
+ #else
+diff -ruN orig/zart/include/VideoFileSource.h new/zart/include/VideoFileSource.h
+--- orig/zart/include/VideoFileSource.h	2019-04-30 03:38:51.000000000 -0600
++++ new/zart/include/VideoFileSource.h	2019-05-09 16:41:16.302486207 -0600
+@@ -50,6 +50,8 @@
+ #if defined(HAS_OPENCV2_HEADERS) || defined(OPENCV2_HEADERS)
+ #include <opencv2/core/core_c.h>
+ #include <opencv2/highgui/highgui_c.h>
++#include <opencv2/videoio.hpp>
++#include <opencv2/videoio/videoio_c.h>
+ #else
+ #include <cv.h>
+ #include <highgui.h>
+diff -ruN orig/zart/include/WebcamSource.h new/zart/include/WebcamSource.h
+--- orig/zart/include/WebcamSource.h	2019-04-30 03:38:51.000000000 -0600
++++ new/zart/include/WebcamSource.h	2019-05-09 16:41:16.303486217 -0600
+@@ -51,6 +51,8 @@
+ #if defined(HAS_OPENCV2_HEADERS) || defined(OPENCV2_HEADERS)
+ #include <opencv2/core/core_c.h>
+ #include <opencv2/highgui/highgui_c.h>
++#include <opencv2/videoio.hpp>
++#include <opencv2/videoio/videoio_c.h>
+ #else
+ #include <cv.h>
+ #include <highgui.h>
+diff -ruN orig/zart/zart.pro new/zart/zart.pro
+--- orig/zart/zart.pro	2019-04-30 03:38:51.000000000 -0600
++++ new/zart/zart.pro	2019-05-09 16:41:16.303486217 -0600
+@@ -19,7 +19,7 @@
+ CONFIG	+= warn_on
+ QT_CONFIG -= no-pkg-config
+ CONFIG += link_pkgconfig
+-PKGCONFIG += opencv fftw3 zlib
++PKGCONFIG += opencv4 fftw3 zlib
+ # LIBS += -lfftw3_threads
+ DEFINES += cimg_use_fftw3 cimg_use_zlib
+ 
