@@ -15,7 +15,7 @@
 Summary: GREYC's Magic for Image Computing
 Name: gmic
 Version: 2.6.2
-Release: 7%{?dist}
+Release: 8%{?dist}
 Source0: https://gmic.eu/files/source/%{name}_%{version}.tar.gz 
 # GIT archive snapshot of https://github.com/c-koi/zart
 Source1: https://github.com/c-koi/zart/archive/%{zart_commit}.tar.gz#/zart-%{shortcommit1}.tar.gz
@@ -39,8 +39,8 @@ BuildRequires: OpenEXR-devel
 BuildRequires: zlib-devel
 BuildRequires: gimp-devel-tools
 BuildRequires: hdf5-devel
-BuildRequires: opencv-devel
-BuildRequires: opencv-xfeatures2d-devel
+BuildRequires: opencv-devel >= 4.1.0
+BuildRequires: opencv-xfeatures2d-devel >= 4.1.0
 BuildRequires: GraphicsMagick-c++-devel
 BuildRequires: ilmbase-devel
 BuildRequires: qt5-qtbase-devel
@@ -91,16 +91,12 @@ Krita plugin for the G'MIC image processing framework
 %prep
 %setup -n %{name}-%{version} 
 
-%if 0%{?fedora} >= 32
 # opencv 4
 %patch0 -p1 
-%endif
 
 # fix overlinking
-%if 0%{?fedora} >= 32
 sed -e 's/pkg-config opencv --libs ||//' -e 's/-lopencv_highgui/-lopencv_videoio/' \
       -e 's/pkg-config opencv/pkg-config opencv4/' -i src/Makefile   
-%endif
 
 %build
   make -C src cli lib libc WGET=/bin/true LIBS=${LDFLAGS}
@@ -183,6 +179,9 @@ chmod -x %{buildroot}/%{_sysconfdir}/bash_completion.d/gmic
 %{_bindir}/gmic_krita_qt
 
 %changelog
+
+* Fri May 24 2019 - David Va <davidva AT tuta DOT io> 2.6.2-8
+- Rebuilt for opencv
 
 * Thu May 16 2019 - David Va <davidva AT tuta DOT io> 2.6.2-7
 - Updated to 2.6.2-7

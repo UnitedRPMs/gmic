@@ -1,17 +1,17 @@
 diff -ruN orig/src/CImg.h new/src/CImg.h
---- orig/src/CImg.h	2019-04-30 03:38:52.000000000 -0600
-+++ new/src/CImg.h	2019-05-09 16:37:03.506858000 -0600
+--- orig/src/CImg.h	2019-05-13 05:05:34.000000000 -0600
++++ new/src/CImg.h	2019-05-24 22:51:21.563660130 -0600
 @@ -422,6 +422,7 @@
  #endif
  #include <cstddef>
  #include <opencv2/opencv.hpp>
 +#include <opencv2/videoio/videoio_c.h>
- #if CV_MAJOR_VERSION >=3
+ #if CV_MAJOR_VERSION>=3
  #define _cimg_fourcc cv::VideoWriter::fourcc
- #else
+ #define _cimg_cap_prop_frame_width cv::VideoCaptureProperties::CAP_PROP_FRAME_WIDTH
 diff -ruN orig/zart/include/VideoFileSource.h new/zart/include/VideoFileSource.h
---- orig/zart/include/VideoFileSource.h	2019-04-30 03:38:51.000000000 -0600
-+++ new/zart/include/VideoFileSource.h	2019-05-09 16:41:16.302486207 -0600
+--- orig/zart/include/VideoFileSource.h	2019-05-13 05:05:33.000000000 -0600
++++ new/zart/include/VideoFileSource.h	2019-05-24 22:52:50.198536497 -0600
 @@ -50,6 +50,8 @@
  #if defined(HAS_OPENCV2_HEADERS) || defined(OPENCV2_HEADERS)
  #include <opencv2/core/core_c.h>
@@ -22,8 +22,8 @@ diff -ruN orig/zart/include/VideoFileSource.h new/zart/include/VideoFileSource.h
  #include <cv.h>
  #include <highgui.h>
 diff -ruN orig/zart/include/WebcamSource.h new/zart/include/WebcamSource.h
---- orig/zart/include/WebcamSource.h	2019-04-30 03:38:51.000000000 -0600
-+++ new/zart/include/WebcamSource.h	2019-05-09 16:41:16.303486217 -0600
+--- orig/zart/include/WebcamSource.h	2019-05-13 05:05:33.000000000 -0600
++++ new/zart/include/WebcamSource.h	2019-05-24 22:53:49.559123419 -0600
 @@ -51,6 +51,8 @@
  #if defined(HAS_OPENCV2_HEADERS) || defined(OPENCV2_HEADERS)
  #include <opencv2/core/core_c.h>
@@ -34,8 +34,8 @@ diff -ruN orig/zart/include/WebcamSource.h new/zart/include/WebcamSource.h
  #include <cv.h>
  #include <highgui.h>
 diff -ruN orig/zart/zart.pro new/zart/zart.pro
---- orig/zart/zart.pro	2019-04-30 03:38:51.000000000 -0600
-+++ new/zart/zart.pro	2019-05-09 16:41:16.303486217 -0600
+--- orig/zart/zart.pro	2019-05-13 05:05:33.000000000 -0600
++++ new/zart/zart.pro	2019-05-24 22:54:52.374744503 -0600
 @@ -19,7 +19,7 @@
  CONFIG	+= warn_on
  QT_CONFIG -= no-pkg-config
