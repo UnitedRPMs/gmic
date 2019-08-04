@@ -15,7 +15,7 @@
 Summary: GREYC's Magic for Image Computing
 Name: gmic
 Version: 2.6.5
-Release: 7%{?dist}
+Release: 8%{?dist}
 Source0: https://gmic.eu/files/source/%{name}_%{version}.tar.gz 
 # GIT archive snapshot of https://github.com/c-koi/zart
 Source1: https://github.com/c-koi/zart/archive/%{zart_commit}.tar.gz#/zart-%{shortcommit1}.tar.gz
@@ -39,8 +39,8 @@ BuildRequires: OpenEXR-devel
 BuildRequires: zlib-devel
 BuildRequires: gimp-devel-tools
 BuildRequires: hdf5-devel
-BuildRequires: opencv-devel >= 4.1.0
-BuildRequires: opencv-xfeatures2d-devel >= 4.1.0
+BuildRequires: opencv-devel >= 4.1.1
+BuildRequires: opencv-xfeatures2d-devel >= 4.1.1
 BuildRequires: GraphicsMagick-c++-devel
 BuildRequires: ilmbase-devel
 BuildRequires: qt5-qtbase-devel
@@ -179,6 +179,9 @@ chmod -x %{buildroot}/%{_sysconfdir}/bash_completion.d/gmic
 %{_bindir}/gmic_krita_qt
 
 %changelog
+
+* Sat Aug 03 2019 - David Va <davidva AT tuta DOT io> 2.6.5-8
+- Rebuilt for opencv
 
 * Tue Jun 11 2019 - David Va <davidva AT tuta DOT io> 2.6.5-7
 - Updated to 2.6.5
