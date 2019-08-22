@@ -1,6 +1,6 @@
 diff -ruN orig/src/CImg.h new/src/CImg.h
---- orig/src/CImg.h	2019-05-13 05:05:34.000000000 -0600
-+++ new/src/CImg.h	2019-05-24 22:51:21.563660130 -0600
+--- orig/src/CImg.h	2019-08-14 05:20:46.000000000 -0600
++++ new/src/CImg.h	2019-08-22 02:26:36.223814271 -0600
 @@ -422,6 +422,7 @@
  #endif
  #include <cstddef>
@@ -10,32 +10,32 @@ diff -ruN orig/src/CImg.h new/src/CImg.h
  #define _cimg_fourcc cv::VideoWriter::fourcc
  #define _cimg_cap_prop_frame_width cv::VideoCaptureProperties::CAP_PROP_FRAME_WIDTH
 diff -ruN orig/zart/include/VideoFileSource.h new/zart/include/VideoFileSource.h
---- orig/zart/include/VideoFileSource.h	2019-05-13 05:05:33.000000000 -0600
-+++ new/zart/include/VideoFileSource.h	2019-05-24 22:52:50.198536497 -0600
+--- orig/zart/include/VideoFileSource.h	2019-08-14 05:20:45.000000000 -0600
++++ new/zart/include/VideoFileSource.h	2019-08-22 02:32:04.327280114 -0600
 @@ -50,6 +50,8 @@
- #if defined(HAS_OPENCV2_HEADERS) || defined(OPENCV2_HEADERS)
- #include <opencv2/core/core_c.h>
- #include <opencv2/highgui/highgui_c.h>
+ #include <QString>
+ #include <opencv2/opencv.hpp>
+ #include "ImageSource.h"
 +#include <opencv2/videoio.hpp>
 +#include <opencv2/videoio/videoio_c.h>
- #else
- #include <cv.h>
- #include <highgui.h>
+ 
+ class VideoFileSource : public ImageSource {
+ public:
 diff -ruN orig/zart/include/WebcamSource.h new/zart/include/WebcamSource.h
---- orig/zart/include/WebcamSource.h	2019-05-13 05:05:33.000000000 -0600
-+++ new/zart/include/WebcamSource.h	2019-05-24 22:53:49.559123419 -0600
-@@ -51,6 +51,8 @@
- #if defined(HAS_OPENCV2_HEADERS) || defined(OPENCV2_HEADERS)
- #include <opencv2/core/core_c.h>
- #include <opencv2/highgui/highgui_c.h>
+--- orig/zart/include/WebcamSource.h	2019-08-14 05:20:45.000000000 -0600
++++ new/zart/include/WebcamSource.h	2019-08-22 02:33:18.843067241 -0600
+@@ -54,6 +54,8 @@
+ #include <QVector>
+ #include <opencv2/opencv.hpp>
+ #include "ImageSource.h"
 +#include <opencv2/videoio.hpp>
 +#include <opencv2/videoio/videoio_c.h>
- #else
- #include <cv.h>
- #include <highgui.h>
+ 
+ class QSplashScreen;
+ class QStatusBar;
 diff -ruN orig/zart/zart.pro new/zart/zart.pro
---- orig/zart/zart.pro	2019-05-13 05:05:33.000000000 -0600
-+++ new/zart/zart.pro	2019-05-24 22:54:52.374744503 -0600
+--- orig/zart/zart.pro	2019-08-14 05:20:45.000000000 -0600
++++ new/zart/zart.pro	2019-08-22 02:34:19.532708322 -0600
 @@ -19,7 +19,7 @@
  CONFIG	+= warn_on
  QT_CONFIG -= no-pkg-config
