@@ -2,20 +2,20 @@
 
 %global use_system_cimg 0
 
-%global zart_commit 6e98a35cbb2ad700cb9f362e2de963acf86e5055
+%global zart_commit 9d67c0de4822edb53140f5864b35d0934c2b599b
 %global shortcommit1 %(c=%{zart_commit}; echo ${c:0:7})
 
 %global gmic_qt_commit ee32003a9f83d72636b30b33cca49a6cd2a390c0
 %global shortcommit2 %(c=%{gmic_qt_commit}; echo ${c:0:7})
 
-%global gmic_community_commit d2290022bd1daa4028c0cc289b93619c53258ab6
+%global gmic_community_commit 4e332b4d530faf56c01139d5c5224de199cb0ced
 %global shortcommit3 %(c=%{gmic_community_commit}; echo ${c:0:7})
 
 
 Summary: GREYC's Magic for Image Computing
 Name: gmic
-Version: 2.6.5
-Release: 8%{?dist}
+Version: 2.7.0
+Release: 7%{?dist}
 Source0: https://gmic.eu/files/source/%{name}_%{version}.tar.gz 
 # GIT archive snapshot of https://github.com/c-koi/zart
 Source1: https://github.com/c-koi/zart/archive/%{zart_commit}.tar.gz#/zart-%{shortcommit1}.tar.gz
@@ -179,6 +179,9 @@ chmod -x %{buildroot}/%{_sysconfdir}/bash_completion.d/gmic
 %{_bindir}/gmic_krita_qt
 
 %changelog
+
+* Thu Aug 22 2019 - David Va <davidva AT tuta DOT io> 2.7.0-8
+- Updated to 2.7.0
 
 * Sat Aug 03 2019 - David Va <davidva AT tuta DOT io> 2.6.5-8
 - Rebuilt for opencv
