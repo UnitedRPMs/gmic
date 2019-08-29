@@ -1,8 +1,14 @@
 %global gimpplugindir %{_libdir}/gimp/2.0/plug-ins
+%global soname %(c=%{version}; echo ${c//./})
+%global basoname %(c=%{soname}; echo ${c:0:1})
 
 %global use_system_cimg 0
 
-%global zart_commit 9d67c0de4822edb53140f5864b35d0934c2b599b
+# Only for test usage
+%global gmic_commit 40cd844766f60a9a57c563ac0286426a7f2a76f5
+%global shortcommit0 %(c=%{gmic_commit}; echo ${c:0:7})
+
+%global zart_commit ca18ba1812662004109540287c4771888aab124b
 %global shortcommit1 %(c=%{zart_commit}; echo ${c:0:7})
 
 %global gmic_qt_commit ee32003a9f83d72636b30b33cca49a6cd2a390c0
@@ -16,6 +22,7 @@ Summary: GREYC's Magic for Image Computing
 Name: gmic
 Version: 2.7.0
 Release: 7%{?dist}
+#Source0: https://github.com/dtschump/gmic/archive/{gmic_commit}.tar.gz#/gmic-{shortcommit0}.tar.gz 
 Source0: https://gmic.eu/files/source/%{name}_%{version}.tar.gz 
 # GIT archive snapshot of https://github.com/c-koi/zart
 Source1: https://github.com/c-koi/zart/archive/%{zart_commit}.tar.gz#/zart-%{shortcommit1}.tar.gz
@@ -23,7 +30,7 @@ Source1: https://github.com/c-koi/zart/archive/%{zart_commit}.tar.gz#/zart-%{sho
 Source2: https://github.com/c-koi/gmic-qt/archive/%{gmic_qt_commit}.tar.gz#/gmic-qt-%{shortcommit2}.tar.gz
 # GIT archive snapshot of https://github.com/dtschump/gmic-community
 Source3: https://github.com/dtschump/gmic-community/archive/%{gmic_community_commit}.tar.gz#/gmic-community-%{shortcommit3}.tar.gz
-Patch0: opencv_4.patch
+Patch0: zart-opencv4.patch
 License: (CeCILL or CeCILL-C) and GPLv3+
 Url: http://gmic.eu/
 %if %{use_system_cimg}
@@ -46,7 +53,11 @@ BuildRequires: ilmbase-devel
 BuildRequires: qt5-qtbase-devel
 BuildRequires: libcurl-devel
 BuildRequires: gcc-c++
+BuildRequires: cmake
 BuildRequires: gimp-devel-tools
+BuildRequires: bash-completion
+BuildRequires: libxkbcommon-devel
+BuildRequires: wget
 # The C library binding was mistakenly put in a -static
 # package despite being a shared library
 Obsoletes: gmic-static <= 2.1.8
@@ -89,33 +100,74 @@ Summary: G'MIC plugin for krita
 Krita plugin for the G'MIC image processing framework
 
 %prep
-%setup -n %{name}-%{version} 
+%setup -n %{name}-%{version} -a 1 -a 2 -a 3 
+# We are using commits updated...
+rm -rf zart gmic-qt gmic-community
+mv -f zart-%{zart_commit} zart 
+mv -f gmic-qt-%{gmic_qt_commit} gmic-qt
+mv -f gmic-community-%{gmic_community_commit} gmic-community
 
-# opencv 4
-%patch0 -p1 
+#patches
+%patch0 -p1
+
+#-------- opencv 4 fix--------
+# for zart
+sed -e 's|opencv|opencv4|' -i zart/zart.pro
 
 # fix overlinking
 sed -e 's/pkg-config opencv --libs ||//' -e 's/-lopencv_highgui/-lopencv_videoio/' \
       -e 's/pkg-config opencv/pkg-config opencv4/' -i src/Makefile   
+#------------------------------
+
+# qmake fix
+sed -i 's|QMAKE = qmake|QMAKE = qmake-qt5|g' src/Makefile
 
 %build
-  make -C src cli lib libc WGET=/bin/true LIBS=${LDFLAGS}
 
-  pushd gmic-qt
-  %{qmake_qt5} CONFIG+=release GMIC_PATH=../src GMIC_DYNAMIC_LINKING=on HOST=none
-  make
-  %{qmake_qt5} CONFIG+=release GMIC_PATH=../src GMIC_DYNAMIC_LINKING=on HOST=gimp
-  make
-  %{qmake_qt5} CONFIG+=release GMIC_PATH=../src GMIC_DYNAMIC_LINKING=on HOST=krita
-  make  
-  popd
+pushd src
 
-  pushd zart
-  %{qmake_qt5} CONFIG+=release GMIC_PATH=../src GMIC_DYNAMIC_LINKING=on QMAKE_CXXFLAGS+=" -DOPENCV2_HEADERS"
-  make
-  popd
+ln -fs ../gmic-community/libcgmic/gmic_libc.cpp .
+ln -fs ../gmic-community/libcgmic/gmic_libc.h .
+ln -fs ../gmic-community/libcgmic/use_libcgmic.c .
+popd
 
+# Build gmic
+# We are using cmake, reduce build time and resources
+mkdir -p build
+pushd build
+cmake \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=%{_libdir} \
+		-DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF \
+		-DENABLE_CCACHE=OFF \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DBUILD_LIB=ON \
+		-DBUILD_LIB_STATIC=OFF \
+		-DBUILD_CLI=ON \
+		-DBUILD_MAN=ON \
+		-DBUILD_BASH_COMPLETION=ON \
+		-DCUSTOM_CFLAGS=ON \
+		-DENABLE_CURL=ON \
+		-DENABLE_X=ON \
+		-DENABLE_FFMPEG=OFF \
+		-DENABLE_FFTW=ON \
+		-DENABLE_GRAPHICSMAGICK=ON \
+		-DENABLE_JPEG=ON \
+		-DENABLE_OPENCV=ON \
+		-DENABLE_OPENEXR=ON \
+		-DENABLE_OPENMP=OFF \
+		-DENABLE_PNG=ON \
+		-DENABLE_TIFF=ON \
+		-DENABLE_ZLIB=ON \
+		-DENABLE_DYNAMIC_LINKING=ON ..
 
+%make_build VERBOSE=0 NOSTRIP=1 
+popd
+echo 'DONE MAKE'
+
+# Create link for zart dynamic linking
+ln -s ../build/libgmic.so src/libgmic.so 
+	
 %if %{use_system_cimg}
 # We want to build against the system installed CImg package.
 # G'MIC provides no way todo this, so we just copy the file
@@ -124,46 +176,93 @@ mv CImg.h CImg.h.bak
 cp /usr/include/CImg.h CImg.h
 %endif
 
+  pushd gmic-qt
+  %{qmake_qt5} CONFIG+=release GMIC_PATH=../src GMIC_DYNAMIC_LINKING=on HOST=none
+  %make_build VERBOSE=0
+  %{qmake_qt5} CONFIG+=release GMIC_PATH=../src GMIC_DYNAMIC_LINKING=on HOST=gimp
+  %make_build VERBOSE=0
+  %{qmake_qt5} CONFIG+=release GMIC_PATH=../src GMIC_DYNAMIC_LINKING=on HOST=krita
+  %make_build VERBOSE=0
+  popd
+
+  pushd zart
+  %{qmake_qt5} CONFIG+=release GMIC_PATH=../src GMIC_DYNAMIC_LINKING=on QMAKE_CXXFLAGS+=" -DOPENCV2_HEADERS"
+  %make_build VERBOSE=0
+  popd
+
+# build libc
+pushd src  
+%make_build libc NOSTRIP=1
+popd
 
 %install
 
+pushd build
+%make_install
+popd
+
+
 pushd src
-make DESTDIR=%{buildroot} install
-rm -r %{buildroot}/usr/{bin/zart,lib64/gimp,bin/gmic_krita_qt}
+VERSION0=$(grep 'gmic_version\ ' gmic.h | tail -c4 | head -c3)
+VERSION1=$(grep 'gmic_version\ ' gmic.h | tail -c4 | head -c1)
+VERSION2=$(grep 'gmic_version\ ' gmic.h | tail -c3 | head -c1)
+VERSION3=$(grep 'gmic_version\ ' gmic.h | tail -c2 | head -c1)
+
+# install libc
+cp -f libcgmic.so %{buildroot}/%{_libdir}/libcgmic.so.${VERSION0}
+cp -f gmic_libc*.h %{buildroot}/%{_includedir}/
+
+# Soname for compatibility in Fedora, the cmake make a .so.1
+gcc -shared -Wl,-soname,libgmic.so.${VERSION1} -o libgmic.so libgmic.o 
+gcc -shared -Wl,-soname,libcgmic.so.1 -o libcgmic.so libcgmic.o libgmic.o 
+cp -f libgmic.so %{buildroot}/%{_libdir}/libgmic.so.${VERSION0}
+cp -f libcgmic.so %{buildroot}/%{_libdir}/libcgmic.so.1
+popd
+
+
+
+# install gmic qt for gimp and krita
+pushd gmic-qt
 
 install -Dm755 ../zart/zart -t %{buildroot}/usr/bin
 
 install -dm 755 %{buildroot}/%{gimpplugindir}/
-install -Dm644 ../gmic-qt/gmic_gimp_qt %{buildroot}/%{gimpplugindir}/
+install -Dm755 gmic_gimp_qt %{buildroot}/%{gimpplugindir}/
 install -Dm644 ../resources/gmic_cluts.gmz %{buildroot}/%{gimpplugindir}/
 
-install -Dm644 ../gmic-qt/gmic_krita_qt -t %{buildroot}/usr/bin/
+install -Dm755 gmic_qt %{buildroot}/usr/bin/
+install -Dm755 gmic_krita_qt %{buildroot}/usr/bin/
 
-# Makefile is not multilib aware
-%ifarch x86_64
-mv %{buildroot}/%{_prefix}/lib/* %{buildroot}/%{_libdir}/
-%endif
+
+# symlinks for compatibility for the library
+ln -sf libgmic.so.%{soname} $RPM_BUILD_ROOT/%{_libdir}/libgmic.so.%{basoname}
+ln -sf libcgmic.so.%{soname} $RPM_BUILD_ROOT/%{_libdir}/libcgmic.so.%{basoname}
+ln -sf libcgmic.so.1 $RPM_BUILD_ROOT/%{_libdir}/libcgmic.so
 
 mkdir -p %{buildroot}/%{_sysconfdir}/bash_completion.d/
-cp -f %{buildroot}/%{_datadir}/bash-completion/completions/gmic %{buildroot}/%{_sysconfdir}/bash_completion.d/
-rm -rf %{buildroot}/%{_datadir}/bash-completion/completions
+cp -f ../resources/gmic_bashcompletion.sh %{buildroot}/%{_sysconfdir}/bash_completion.d/gmic
  
 # Sourced files shouldn't be executable
 chmod -x %{buildroot}/%{_sysconfdir}/bash_completion.d/gmic
+popd 
+
+# COPYING fix
+mv $PWD/gmic-community/libcgmic/COPYING COPYING-libcgmic 
+mv $PWD/gmic-qt/COPYING COPYING-gmic-qt 
 
 %ldconfig_scriptlets
 
 %files
 %doc README
-%license COPYING 
+%license COPYING COPYING-gmic-qt COPYING-libcgmic
 %{_bindir}/gmic
 %{_bindir}/gmic_qt
 %{_bindir}/zart
 %{_sysconfdir}/bash_completion.d/gmic
 %{_libdir}/libgmic.so.*
 %{_libdir}/libcgmic.so.*
+%{_libdir}/cmake/gmic/*.cmake
 %{_mandir}/man1/%{name}.1.gz
-%{_mandir}/fr/man1/%{name}.1.gz
 
 %files devel
 %{_prefix}/include/gmic.h
@@ -182,6 +281,7 @@ chmod -x %{buildroot}/%{_sysconfdir}/bash_completion.d/gmic
 
 * Thu Aug 22 2019 - David Va <davidva AT tuta DOT io> 2.7.0-8
 - Updated to 2.7.0
+- Changed to Cmake because reduce build time and resources
 
 * Sat Aug 03 2019 - David Va <davidva AT tuta DOT io> 2.6.5-8
 - Rebuilt for opencv
