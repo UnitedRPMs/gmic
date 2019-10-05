@@ -11,16 +11,16 @@
 %global zart_commit ca18ba1812662004109540287c4771888aab124b
 %global shortcommit1 %(c=%{zart_commit}; echo ${c:0:7})
 
-%global gmic_qt_commit ee32003a9f83d72636b30b33cca49a6cd2a390c0
+%global gmic_qt_commit 42584136dc30008f7ddbdf29d1a92c8d685bdc97
 %global shortcommit2 %(c=%{gmic_qt_commit}; echo ${c:0:7})
 
-%global gmic_community_commit 804e54c92844b34fd7bef18d3ca9933be7dd6775
+%global gmic_community_commit d727ef330a9e419a01360d6af84f8e1fe67eb6d5
 %global shortcommit3 %(c=%{gmic_community_commit}; echo ${c:0:7})
 
 
 Summary: GREYC's Magic for Image Computing
 Name: gmic
-Version: 2.7.1
+Version: 2.7.2
 Release: 7%{?dist}
 #Source0: https://github.com/dtschump/gmic/archive/{gmic_commit}.tar.gz#/gmic-{shortcommit0}.tar.gz 
 Source0: https://gmic.eu/files/source/%{name}_%{version}.tar.gz 
@@ -278,6 +278,9 @@ mv $PWD/gmic-qt/COPYING COPYING-gmic-qt
 %{_bindir}/gmic_krita_qt
 
 %changelog
+
+* Fri Oct 04 2019 - David Va <davidva AT tuta DOT io> 2.7.2-7
+- Updated to 2.7.2
 
 * Tue Sep 03 2019 - David Va <davidva AT tuta DOT io> 2.7.1-7
 - Updated to 2.7.1
