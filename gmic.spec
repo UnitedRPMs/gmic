@@ -2,7 +2,8 @@
 %global soname %(c=%{version}; echo ${c//./})
 %global basoname %(c=%{soname}; echo ${c:0:1})
 
-%global use_system_cimg 0
+# Conditional system cimg
+%bcond_with system_cimg
 
 # Only for test usage
 %global gmic_commit 40cd844766f60a9a57c563ac0286426a7f2a76f5
@@ -14,27 +15,30 @@
 %global gmic_qt_commit 42584136dc30008f7ddbdf29d1a92c8d685bdc97
 %global shortcommit2 %(c=%{gmic_qt_commit}; echo ${c:0:7})
 
-%global gmic_community_commit d727ef330a9e419a01360d6af84f8e1fe67eb6d5
+%global gmic_community_commit 7f714fab0d9f817e0b01c5a456aa2385ce01a72a
 %global shortcommit3 %(c=%{gmic_community_commit}; echo ${c:0:7})
 
 
 Summary: GREYC's Magic for Image Computing
 Name: gmic
-Version: 2.7.2
+Version: 2.7.3
 Release: 7%{?dist}
 #Source0: https://github.com/dtschump/gmic/archive/{gmic_commit}.tar.gz#/gmic-{shortcommit0}.tar.gz 
-Source0: https://gmic.eu/files/source/%{name}_%{version}.tar.gz 
+Source0: https://github.com/dtschump/gmic/archive/v.2.7.3.tar.gz
 # GIT archive snapshot of https://github.com/c-koi/zart
 Source1: https://github.com/c-koi/zart/archive/%{zart_commit}.tar.gz#/zart-%{shortcommit1}.tar.gz
 # GIT archive snapshot of https://github.com/c-koi/gmic-qt
 Source2: https://github.com/c-koi/gmic-qt/archive/%{gmic_qt_commit}.tar.gz#/gmic-qt-%{shortcommit2}.tar.gz
 # GIT archive snapshot of https://github.com/dtschump/gmic-community
 Source3: https://github.com/dtschump/gmic-community/archive/%{gmic_community_commit}.tar.gz#/gmic-community-%{shortcommit3}.tar.gz
+# CImg.h header same version to gmic
+Source4: https://framagit.org/dtschump/CImg/raw/4e7a1da49f0fa229ffdc23486e6fedec96533654/CImg.h
 Patch0: zart-opencv4.patch
+Patch1: cmake_fix.patch
 License: (CeCILL or CeCILL-C) and GPLv3+
 Url: http://gmic.eu/
-%if %{use_system_cimg}
-BuildRequires: CImg-devel == 1:%{version}
+%if %{with system_cimg}
+BuildRequires: CImg-devel 
 %endif
 BuildRequires: libX11-devel
 BuildRequires: libXext-devel
@@ -100,7 +104,7 @@ Summary: G'MIC plugin for krita
 Krita plugin for the G'MIC image processing framework
 
 %prep
-%setup -n %{name}-%{version} -a 1 -a 2 -a 3 
+%setup -n %{name}-v.%{version} -a 1 -a 2 -a 3 
 # We are using commits updated...
 rm -rf zart gmic-qt gmic-community
 mv -f zart-%{zart_commit} zart 
@@ -109,6 +113,7 @@ mv -f gmic-community-%{gmic_community_commit} gmic-community
 
 #patches
 %patch0 -p1
+%patch1 -p1
 
 #-------- opencv 4 fix--------
 # for zart
@@ -167,13 +172,15 @@ echo 'DONE MAKE'
 
 # Create link for zart dynamic linking
 ln -s ../build/libgmic.so src/libgmic.so 
+
+mv -f %{S:4} src/CImg.h
 	
-%if %{use_system_cimg}
+%if %{with system_cimg}
 # We want to build against the system installed CImg package.
 # G'MIC provides no way todo this, so we just copy the file
 # over what's there already
-mv CImg.h CImg.h.bak
-cp /usr/include/CImg.h CImg.h
+mv src/CImg.h src/CImg.h.bak
+cp /usr/include/CImg.h src/CImg.h
 %endif
 
   pushd gmic-qt
@@ -208,17 +215,14 @@ VERSION1=$(grep 'gmic_version\ ' gmic.h | tail -c4 | head -c1)
 VERSION2=$(grep 'gmic_version\ ' gmic.h | tail -c3 | head -c1)
 VERSION3=$(grep 'gmic_version\ ' gmic.h | tail -c2 | head -c1)
 
+# Soname of cmake? why so.1?
+cp -f libgmic.so %{buildroot}/%{_libdir}/libgmic.so.${VERSION1}
+cp -f libcgmic.so %{buildroot}/%{_libdir}/libcgmic.so.${VERSION1}
+
 # install libc
-cp -f libcgmic.so %{buildroot}/%{_libdir}/libcgmic.so.${VERSION0}
+#cp -f libcgmic.so %{buildroot}/%{_libdir}/libcgmic.so.${VERSION0}
 cp -f gmic_libc*.h %{buildroot}/%{_includedir}/
-
-# Soname for compatibility in Fedora, the cmake make a .so.1
-gcc -shared -Wl,-soname,libgmic.so.${VERSION1} -o libgmic.so libgmic.o 
-gcc -shared -Wl,-soname,libcgmic.so.1 -o libcgmic.so libcgmic.o libgmic.o 
-cp -f libgmic.so %{buildroot}/%{_libdir}/libgmic.so.${VERSION0}
-cp -f libcgmic.so %{buildroot}/%{_libdir}/libcgmic.so.1
 popd
-
 
 
 # install gmic qt for gimp and krita
@@ -232,23 +236,35 @@ install -Dm644 ../resources/gmic_cluts.gmz %{buildroot}/%{gimpplugindir}/
 
 install -Dm755 gmic_qt %{buildroot}/usr/bin/
 install -Dm755 gmic_krita_qt %{buildroot}/usr/bin/
-
+popd
 
 # symlinks for compatibility for the library
-ln -sf libgmic.so.%{soname} $RPM_BUILD_ROOT/%{_libdir}/libgmic.so.%{basoname}
-ln -sf libcgmic.so.%{soname} $RPM_BUILD_ROOT/%{_libdir}/libcgmic.so.%{basoname}
-ln -sf libcgmic.so.1 $RPM_BUILD_ROOT/%{_libdir}/libcgmic.so
+ln -sf libgmic.so.${VERSION1} $RPM_BUILD_ROOT/%{_libdir}/libgmic.so
+ln -sf libgmic.so.${VERSION1} $RPM_BUILD_ROOT/%{_libdir}/libgmic.so.${VERSION0}
+ln -sf libgmic.so.${VERSION1} $RPM_BUILD_ROOT/%{_libdir}/libgmic.so.1
+ln -sf libgmic.so.${VERSION1} $RPM_BUILD_ROOT/%{_libdir}/libgmic.so.%{version}
 
+ln -sf libcgmic.so.${VERSION1} $RPM_BUILD_ROOT/%{_libdir}/libcgmic.so
+ln -sf libcgmic.so.${VERSION1} $RPM_BUILD_ROOT/%{_libdir}/libcgmic.so.${VERSION0}
+ln -sf libcgmic.so.${VERSION1} $RPM_BUILD_ROOT/%{_libdir}/libcgmic.so.1
+ln -sf libcgmic.so.${VERSION1} $RPM_BUILD_ROOT/%{_libdir}/libcgmic.so.%{version}
+
+
+pushd build/resources/
 mkdir -p %{buildroot}/%{_sysconfdir}/bash_completion.d/
-cp -f ../resources/gmic_bashcompletion.sh %{buildroot}/%{_sysconfdir}/bash_completion.d/gmic
+cp -f gmic_bashcompletion.sh  %{buildroot}/%{_sysconfdir}/bash_completion.d/gmic
+popd
  
 # Sourced files shouldn't be executable
 chmod -x %{buildroot}/%{_sysconfdir}/bash_completion.d/gmic
-popd 
+ 
 
 # COPYING fix
 mv $PWD/gmic-community/libcgmic/COPYING COPYING-libcgmic 
 mv $PWD/gmic-qt/COPYING COPYING-gmic-qt 
+
+# cmake fix, using the correct soname for the release
+sed -i "s|libgmic.so.1|libgmic.so.${VERSION1}|g" $RPM_BUILD_ROOT/%{_libdir}/cmake/gmic/GmicTargets-release.cmake
 
 %ldconfig_scriptlets
 
@@ -278,6 +294,9 @@ mv $PWD/gmic-qt/COPYING COPYING-gmic-qt
 %{_bindir}/gmic_krita_qt
 
 %changelog
+
+* Tue Oct 08 2019 - David Va <davidva AT tuta DOT io> 2.7.3-7
+- Updated to 2.7.3
 
 * Fri Oct 04 2019 - David Va <davidva AT tuta DOT io> 2.7.2-7
 - Updated to 2.7.2

@@ -1,0 +1,22 @@
+diff -ruN orig/CMakeLists.txt new/CMakeLists.txt
+--- orig/CMakeLists.txt	2019-10-08 03:42:02.000000000 -0600
++++ new/CMakeLists.txt	2019-10-09 20:01:18.974437326 -0600
+@@ -1,4 +1,4 @@
+-s#
++#
+ #  File        : CMakeLists.txt
+ #                ( cmake-based build system configuration file )
+ #
+@@ -273,10 +273,10 @@
+   add_library(libgmic SHARED ${CLI_Includes} ${CLI_Sources})
+   add_dependencies(libgmic gmic_extra_headers)
+   set_target_properties(libgmic PROPERTIES COMPILE_FLAGS "${CLI_COMPILE_FLAGS}")
+-  set_target_properties(libgmic PROPERTIES SOVERSION "1" OUTPUT_NAME "gmic")
++  set_target_properties(libgmic PROPERTIES SOVERSION "2" OUTPUT_NAME "gmic")
+   if(NOT APPLE)
+     #the following is automatic unless NO_SONAME is set
+-    #set_target_properties(libgmic PROPERTIES LINK_FLAGS "-Wl,-soname,libgmic.so.1")
++    set_target_properties(libgmic PROPERTIES LINK_FLAGS "-Wl,-soname,libgmic.so.2")
+   endif()
+   target_link_libraries(libgmic
+     ${X11_LIBRARIES}

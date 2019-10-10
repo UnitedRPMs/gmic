@@ -8,3 +8,4 @@ SRPMS/*
 .directory
 new/*
 orig/*
+*.rpm
