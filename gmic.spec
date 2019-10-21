@@ -9,22 +9,22 @@
 %global gmic_commit 40cd844766f60a9a57c563ac0286426a7f2a76f5
 %global shortcommit0 %(c=%{gmic_commit}; echo ${c:0:7})
 
-%global zart_commit ca18ba1812662004109540287c4771888aab124b
+%global zart_commit 59257a267a2f41273f8a12fb6ee4c845fcd1910b
 %global shortcommit1 %(c=%{zart_commit}; echo ${c:0:7})
 
 %global gmic_qt_commit 42584136dc30008f7ddbdf29d1a92c8d685bdc97
 %global shortcommit2 %(c=%{gmic_qt_commit}; echo ${c:0:7})
 
-%global gmic_community_commit 7f714fab0d9f817e0b01c5a456aa2385ce01a72a
+%global gmic_community_commit bf64145be4ca643900056b7d0dcc5096ed1df607
 %global shortcommit3 %(c=%{gmic_community_commit}; echo ${c:0:7})
 
 
 Summary: GREYC's Magic for Image Computing
 Name: gmic
-Version: 2.7.3
+Version: 2.7.4
 Release: 7%{?dist}
 #Source0: https://github.com/dtschump/gmic/archive/{gmic_commit}.tar.gz#/gmic-{shortcommit0}.tar.gz 
-Source0: https://github.com/dtschump/gmic/archive/v.2.7.3.tar.gz
+Source0: https://github.com/dtschump/gmic/archive/v.2.7.4.tar.gz
 # GIT archive snapshot of https://github.com/c-koi/zart
 Source1: https://github.com/c-koi/zart/archive/%{zart_commit}.tar.gz#/zart-%{shortcommit1}.tar.gz
 # GIT archive snapshot of https://github.com/c-koi/gmic-qt
@@ -32,7 +32,7 @@ Source2: https://github.com/c-koi/gmic-qt/archive/%{gmic_qt_commit}.tar.gz#/gmic
 # GIT archive snapshot of https://github.com/dtschump/gmic-community
 Source3: https://github.com/dtschump/gmic-community/archive/%{gmic_community_commit}.tar.gz#/gmic-community-%{shortcommit3}.tar.gz
 # CImg.h header same version to gmic
-Source4: https://framagit.org/dtschump/CImg/raw/4e7a1da49f0fa229ffdc23486e6fedec96533654/CImg.h
+Source4: https://framagit.org/dtschump/CImg/raw/3efdd8fb35e76873edcb01f9c30af762aeccb97a/CImg.h
 Patch0: zart-opencv4.patch
 Patch1: cmake_fix.patch
 License: (CeCILL or CeCILL-C) and GPLv3+
@@ -50,8 +50,8 @@ BuildRequires: OpenEXR-devel
 BuildRequires: zlib-devel
 BuildRequires: gimp-devel-tools
 BuildRequires: hdf5-devel
-BuildRequires: opencv-devel >= 4.1.1
-BuildRequires: opencv-xfeatures2d-devel >= 4.1.1
+BuildRequires: opencv-devel >= 4.1.2
+BuildRequires: opencv-xfeatures2d-devel >= 4.1.2
 BuildRequires: GraphicsMagick-c++-devel
 BuildRequires: ilmbase-devel
 BuildRequires: qt5-qtbase-devel
@@ -294,6 +294,9 @@ sed -i "s|libgmic.so.1|libgmic.so.${VERSION1}|g" $RPM_BUILD_ROOT/%{_libdir}/cmak
 %{_bindir}/gmic_krita_qt
 
 %changelog
+
+* Mon Oct 21 2019 - David Va <davidva AT tuta DOT io> 2.7.4-7
+- Updated to 2.7.4
 
 * Tue Oct 08 2019 - David Va <davidva AT tuta DOT io> 2.7.3-7
 - Updated to 2.7.3
