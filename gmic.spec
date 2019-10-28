@@ -2,6 +2,13 @@
 %global soname %(c=%{version}; echo ${c//./})
 %global basoname %(c=%{soname}; echo ${c:0:1})
 
+%global debug_package %{nil}
+
+
+# We have problems compiling zart in gmic 2.7.5
+# https://github.com/c-koi/zart/issues/13
+%bcond_with zart
+
 # Conditional system cimg
 %bcond_with system_cimg
 
@@ -9,22 +16,22 @@
 %global gmic_commit 40cd844766f60a9a57c563ac0286426a7f2a76f5
 %global shortcommit0 %(c=%{gmic_commit}; echo ${c:0:7})
 
-%global zart_commit 59257a267a2f41273f8a12fb6ee4c845fcd1910b
+%global zart_commit d1d5192e3856fe38ba7651ef9c4f433d9be0ab5f
 %global shortcommit1 %(c=%{zart_commit}; echo ${c:0:7})
 
-%global gmic_qt_commit 42584136dc30008f7ddbdf29d1a92c8d685bdc97
+%global gmic_qt_commit 357530589738b18c2cd1ee20e0e8542f7cbe3e18
 %global shortcommit2 %(c=%{gmic_qt_commit}; echo ${c:0:7})
 
-%global gmic_community_commit bf64145be4ca643900056b7d0dcc5096ed1df607
+%global gmic_community_commit 5a9aefc05e9585c1198c1d68f4b47ee32ff68ae2
 %global shortcommit3 %(c=%{gmic_community_commit}; echo ${c:0:7})
 
 
 Summary: GREYC's Magic for Image Computing
 Name: gmic
-Version: 2.7.4
+Version: 2.7.5
 Release: 7%{?dist}
 #Source0: https://github.com/dtschump/gmic/archive/{gmic_commit}.tar.gz#/gmic-{shortcommit0}.tar.gz 
-Source0: https://github.com/dtschump/gmic/archive/v.2.7.4.tar.gz
+Source0: https://github.com/dtschump/gmic/archive/v.%{version}.tar.gz
 # GIT archive snapshot of https://github.com/c-koi/zart
 Source1: https://github.com/c-koi/zart/archive/%{zart_commit}.tar.gz#/zart-%{shortcommit1}.tar.gz
 # GIT archive snapshot of https://github.com/c-koi/gmic-qt
@@ -32,7 +39,7 @@ Source2: https://github.com/c-koi/gmic-qt/archive/%{gmic_qt_commit}.tar.gz#/gmic
 # GIT archive snapshot of https://github.com/dtschump/gmic-community
 Source3: https://github.com/dtschump/gmic-community/archive/%{gmic_community_commit}.tar.gz#/gmic-community-%{shortcommit3}.tar.gz
 # CImg.h header same version to gmic
-Source4: https://framagit.org/dtschump/CImg/raw/3efdd8fb35e76873edcb01f9c30af762aeccb97a/CImg.h
+Source4: https://framagit.org/dtschump/CImg/raw/0a9255ca6ac5e6ddb2440bab1155815529ad272f/CImg.h
 Patch0: zart-opencv4.patch
 Patch1: cmake_fix.patch
 License: (CeCILL or CeCILL-C) and GPLv3+
@@ -118,6 +125,8 @@ mv -f gmic-community-%{gmic_community_commit} gmic-community
 #-------- opencv 4 fix--------
 # for zart
 sed -e 's|opencv|opencv4|' -i zart/zart.pro
+rm -f zart/.qmake.stash
+
 
 # fix overlinking
 sed -e 's/pkg-config opencv --libs ||//' -e 's/-lopencv_highgui/-lopencv_videoio/' \
@@ -166,7 +175,7 @@ cmake \
 		-DENABLE_ZLIB=ON \
 		-DENABLE_DYNAMIC_LINKING=ON ..
 
-%make_build VERBOSE=0 NOSTRIP=1 
+%make_build VERBOSE=0 NOSTRIP=1 -j1
 popd
 echo 'DONE MAKE'
 
@@ -192,10 +201,12 @@ cp /usr/include/CImg.h src/CImg.h
   %make_build VERBOSE=0
   popd
 
+%if !%{with zart}
   pushd zart
-  %{qmake_qt5} CONFIG+=release GMIC_PATH=../src GMIC_DYNAMIC_LINKING=on QMAKE_CXXFLAGS+=" -DOPENCV2_HEADERS"
+  %{qmake_qt5} CONFIG+=release GMIC_PATH=../src zart.pro 
   %make_build VERBOSE=0
   popd
+%endif
 
 # build libc
 pushd src  
@@ -228,7 +239,9 @@ popd
 # install gmic qt for gimp and krita
 pushd gmic-qt
 
+%if !%{with zart}
 install -Dm755 ../zart/zart -t %{buildroot}/usr/bin
+%endif
 
 install -dm 755 %{buildroot}/%{gimpplugindir}/
 install -Dm755 gmic_gimp_qt %{buildroot}/%{gimpplugindir}/
@@ -273,7 +286,9 @@ sed -i "s|libgmic.so.1|libgmic.so.${VERSION1}|g" $RPM_BUILD_ROOT/%{_libdir}/cmak
 %license COPYING COPYING-gmic-qt COPYING-libcgmic
 %{_bindir}/gmic
 %{_bindir}/gmic_qt
+%if !%{with zart}
 %{_bindir}/zart
+%endif
 %{_sysconfdir}/bash_completion.d/gmic
 %{_libdir}/libgmic.so.*
 %{_libdir}/libcgmic.so.*
@@ -294,6 +309,9 @@ sed -i "s|libgmic.so.1|libgmic.so.${VERSION1}|g" $RPM_BUILD_ROOT/%{_libdir}/cmak
 %{_bindir}/gmic_krita_qt
 
 %changelog
+
+* Sat Oct 26 2019 - David Va <davidva AT tuta DOT io> 2.7.5-7
+- Updated to 2.7.5
 
 * Mon Oct 21 2019 - David Va <davidva AT tuta DOT io> 2.7.4-7
 - Updated to 2.7.4
