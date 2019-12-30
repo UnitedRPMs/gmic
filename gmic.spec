@@ -29,7 +29,7 @@
 Summary: GREYC's Magic for Image Computing
 Name: gmic
 Version: 2.8.1
-Release: 7%{?dist}
+Release: 8%{?dist}
 #Source0: https://github.com/dtschump/gmic/archive/{gmic_commit}.tar.gz#/gmic-{shortcommit0}.tar.gz 
 Source0: https://github.com/dtschump/gmic/archive/v.%{version}.tar.gz
 # GIT archive snapshot of https://github.com/c-koi/zart
@@ -309,6 +309,9 @@ sed -i "s|libgmic.so.1|libgmic.so.${VERSION1}|g" $RPM_BUILD_ROOT/%{_libdir}/cmak
 %{_bindir}/gmic_krita_qt
 
 %changelog
+
+* Sun Dec 29 2019 - David Va <davidva AT tuta DOT io> 2.8.1-8
+- Rebuilt for opencv
 
 * Fri Dec 20 2019 - David Va <davidva AT tuta DOT io> 2.8.1-7
 - Updated to 2.8.1
