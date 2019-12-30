@@ -57,8 +57,8 @@ BuildRequires: OpenEXR-devel
 BuildRequires: zlib-devel
 BuildRequires: gimp-devel-tools
 BuildRequires: hdf5-devel
-BuildRequires: opencv-devel >= 4.1.2
-BuildRequires: opencv-xfeatures2d-devel >= 4.1.2
+BuildRequires: opencv-devel >= 4.2.0
+BuildRequires: opencv-xfeatures2d-devel >= 4.2.0
 BuildRequires: GraphicsMagick-c++-devel
 BuildRequires: ilmbase-devel
 BuildRequires: qt5-qtbase-devel
