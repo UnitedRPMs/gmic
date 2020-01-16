@@ -16,20 +16,20 @@
 %global gmic_commit 40cd844766f60a9a57c563ac0286426a7f2a76f5
 %global shortcommit0 %(c=%{gmic_commit}; echo ${c:0:7})
 
-%global zart_commit 099554f8bf26c6161cd8c0b7df3d1aedad27e8ec
+%global zart_commit 099554f8bf26c6161cd8c0b7df3d1aedad27e8ec 
 %global shortcommit1 %(c=%{zart_commit}; echo ${c:0:7})
 
-%global gmic_qt_commit e7ff4b6bf81b2d04968efbab3bb623bc32f268b4
+%global gmic_qt_commit 4666d2e25116e4d4c12f0c075b0c39b0e66cfa33
 %global shortcommit2 %(c=%{gmic_qt_commit}; echo ${c:0:7})
 
-%global gmic_community_commit 09f1dda72ce37d8452ba015732a5de04b7760fa4
+%global gmic_community_commit 2c643575e212b5a677e481769f3fd896f6cc8ecb
 %global shortcommit3 %(c=%{gmic_community_commit}; echo ${c:0:7})
 
 
 Summary: GREYC's Magic for Image Computing
 Name: gmic
-Version: 2.8.1
-Release: 8%{?dist}
+Version: 2.8.2
+Release: 7%{?dist}
 #Source0: https://github.com/dtschump/gmic/archive/{gmic_commit}.tar.gz#/gmic-{shortcommit0}.tar.gz 
 Source0: https://github.com/dtschump/gmic/archive/v.%{version}.tar.gz
 # GIT archive snapshot of https://github.com/c-koi/zart
@@ -39,7 +39,7 @@ Source2: https://github.com/c-koi/gmic-qt/archive/%{gmic_qt_commit}.tar.gz#/gmic
 # GIT archive snapshot of https://github.com/dtschump/gmic-community
 Source3: https://github.com/dtschump/gmic-community/archive/%{gmic_community_commit}.tar.gz#/gmic-community-%{shortcommit3}.tar.gz
 # CImg.h header same version to gmic
-Source4: https://framagit.org/dtschump/CImg/raw/530715cfe254d325cf8cec345210d9935fe4cf50/CImg.h
+Source4: https://raw.githubusercontent.com/dtschump/CImg/b29d5cb0ed4ca3d94ceae31232668f646c9e45a9/CImg.h
 Patch0: zart-opencv4.patch
 Patch1: cmake_fix.patch
 License: (CeCILL or CeCILL-C) and GPLv3+
@@ -309,6 +309,9 @@ sed -i "s|libgmic.so.1|libgmic.so.${VERSION1}|g" $RPM_BUILD_ROOT/%{_libdir}/cmak
 %{_bindir}/gmic_krita_qt
 
 %changelog
+
+* Thu Jan 16 2020 - David Va <davidva AT tuta DOT io> 2.8.2-7
+- Updated to 2.8.2-7
 
 * Sun Dec 29 2019 - David Va <davidva AT tuta DOT io> 2.8.1-8
 - Rebuilt for opencv
