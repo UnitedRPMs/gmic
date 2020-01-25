@@ -13,25 +13,25 @@
 %bcond_with system_cimg
 
 # Only for test usage
-%global gmic_commit 40cd844766f60a9a57c563ac0286426a7f2a76f5
+%global gmic_commit 71e0f9cfd4c63e545b9a7a3f0515c33f93e2deae
 %global shortcommit0 %(c=%{gmic_commit}; echo ${c:0:7})
 
 %global zart_commit 099554f8bf26c6161cd8c0b7df3d1aedad27e8ec 
 %global shortcommit1 %(c=%{zart_commit}; echo ${c:0:7})
 
-%global gmic_qt_commit 4666d2e25116e4d4c12f0c075b0c39b0e66cfa33
+%global gmic_qt_commit 168e4cc8d429c3ba4069f242090ac36ec94dfc33
 %global shortcommit2 %(c=%{gmic_qt_commit}; echo ${c:0:7})
 
-%global gmic_community_commit 2c643575e212b5a677e481769f3fd896f6cc8ecb
+%global gmic_community_commit d77951f85ed6286a490a16fa4695426a3ed11f8e
 %global shortcommit3 %(c=%{gmic_community_commit}; echo ${c:0:7})
 
 
 Summary: GREYC's Magic for Image Computing
 Name: gmic
-Version: 2.8.2
+Version: 2.8.3
 Release: 7%{?dist}
-#Source0: https://github.com/dtschump/gmic/archive/{gmic_commit}.tar.gz#/gmic-{shortcommit0}.tar.gz 
-Source0: https://github.com/dtschump/gmic/archive/v.%{version}.tar.gz
+Source0: https://github.com/dtschump/gmic/archive/%{gmic_commit}.tar.gz#/gmic-%{shortcommit0}.tar.gz 
+#Source0: https://github.com/dtschump/gmic/archive/v.%{version}.tar.gz
 # GIT archive snapshot of https://github.com/c-koi/zart
 Source1: https://github.com/c-koi/zart/archive/%{zart_commit}.tar.gz#/zart-%{shortcommit1}.tar.gz
 # GIT archive snapshot of https://github.com/c-koi/gmic-qt
@@ -39,7 +39,8 @@ Source2: https://github.com/c-koi/gmic-qt/archive/%{gmic_qt_commit}.tar.gz#/gmic
 # GIT archive snapshot of https://github.com/dtschump/gmic-community
 Source3: https://github.com/dtschump/gmic-community/archive/%{gmic_community_commit}.tar.gz#/gmic-community-%{shortcommit3}.tar.gz
 # CImg.h header same version to gmic
-Source4: https://raw.githubusercontent.com/dtschump/CImg/b29d5cb0ed4ca3d94ceae31232668f646c9e45a9/CImg.h
+# https://github.com/dtschump/CImg
+Source4: https://raw.githubusercontent.com/dtschump/CImg/12f1fac5dc1221eca3c0ecdca7bd77da7392ddbb/CImg.h
 Patch0: zart-opencv4.patch
 Patch1: cmake_fix.patch
 License: (CeCILL or CeCILL-C) and GPLv3+
@@ -69,6 +70,7 @@ BuildRequires: gimp-devel-tools
 BuildRequires: bash-completion
 BuildRequires: libxkbcommon-devel
 BuildRequires: wget
+BuildRequires: dos2unix
 # The C library binding was mistakenly put in a -static
 # package despite being a shared library
 Obsoletes: gmic-static <= 2.1.8
@@ -111,7 +113,7 @@ Summary: G'MIC plugin for krita
 Krita plugin for the G'MIC image processing framework
 
 %prep
-%setup -n %{name}-v.%{version} -a 1 -a 2 -a 3 
+%setup -n gmic-6c4341fe1fc0988191d0459016c3744779c5254f -a 1 -a 2 -a 3 
 # We are using commits updated...
 rm -rf zart gmic-qt gmic-community
 mv -f zart-%{zart_commit} zart 
@@ -121,6 +123,10 @@ mv -f gmic-community-%{gmic_community_commit} gmic-community
 #patches
 %patch0 -p1
 %patch1 -p1
+
+# fixes
+dos2unix src/Makefile
+
 
 #-------- opencv 4 fix--------
 # for zart
@@ -309,6 +315,9 @@ sed -i "s|libgmic.so.1|libgmic.so.${VERSION1}|g" $RPM_BUILD_ROOT/%{_libdir}/cmak
 %{_bindir}/gmic_krita_qt
 
 %changelog
+
+* Sat Jan 25 2020 - David Va <davidva AT tuta DOT io> 2.8.3-7
+- Updated to 2.8.3-7
 
 * Thu Jan 16 2020 - David Va <davidva AT tuta DOT io> 2.8.2-7
 - Updated to 2.8.2-7
