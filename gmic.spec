@@ -113,7 +113,7 @@ Summary: G'MIC plugin for krita
 Krita plugin for the G'MIC image processing framework
 
 %prep
-%setup -n gmic-6c4341fe1fc0988191d0459016c3744779c5254f -a 1 -a 2 -a 3 
+%setup -n gmic-%{gmic_commit} -a 1 -a 2 -a 3 
 # We are using commits updated...
 rm -rf zart gmic-qt gmic-community
 mv -f zart-%{zart_commit} zart 
