@@ -55,7 +55,7 @@ Source2: https://github.com/c-koi/gmic-qt/archive/%{gmic_qt_commit}.tar.gz#/gmic
 Source3: https://github.com/dtschump/gmic-community/archive/%{gmic_community_commit}.tar.gz#/gmic-community-%{shortcommit3}.tar.gz
 # CImg.h header same version to gmic
 # https://github.com/dtschump/CImg
-Source4: https://raw.githubusercontent.com/dtschump/CImg/12f1fac5dc1221eca3c0ecdca7bd77da7392ddbb/CImg.h
+Source4: https://raw.githubusercontent.com/dtschump/CImg/9e01d8868613bf31e305044d8e2e9d9f0217f030/CImg.h
 Patch0: zart-opencv4.patch
 Patch1: cmake_fix.patch
 License: (CeCILL or CeCILL-C) and GPLv3+
