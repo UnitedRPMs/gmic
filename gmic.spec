@@ -1,3 +1,18 @@
+#
+# spec file for package gmic
+#
+# Copyright (c) 2020 UnitedRPMs.
+#
+# All modifications and additions to the file contributed by third parties
+# remain the property of their copyright owners, unless otherwise agreed
+# upon. The license for this file, and modifications and additions to the
+# file, is the same license as for the pristine package itself (unless the
+# license for the pristine package is not an Open Source License, in which
+# case the license is the MIT License). An "Open Source License" is a
+# license that conforms to the Open Source Definition (Version 1.9)
+# published by the Open Source Initiative.
+#
+
 %global gimpplugindir %{_libdir}/gimp/2.0/plug-ins
 %global soname %(c=%{version}; echo ${c//./})
 %global basoname %(c=%{soname}; echo ${c:0:1})
@@ -13,7 +28,7 @@
 %bcond_with system_cimg
 
 # Only for test usage
-%global gmic_commit 71e0f9cfd4c63e545b9a7a3f0515c33f93e2deae
+%global gmic_commit f09bfb3528b245a8dbd9d0a3dae87a1d1020bef0
 %global shortcommit0 %(c=%{gmic_commit}; echo ${c:0:7})
 
 %global zart_commit 099554f8bf26c6161cd8c0b7df3d1aedad27e8ec 
@@ -22,13 +37,13 @@
 %global gmic_qt_commit 168e4cc8d429c3ba4069f242090ac36ec94dfc33
 %global shortcommit2 %(c=%{gmic_qt_commit}; echo ${c:0:7})
 
-%global gmic_community_commit d77951f85ed6286a490a16fa4695426a3ed11f8e
+%global gmic_community_commit 9bf625c004a22ae1231db51cf12f072969410688
 %global shortcommit3 %(c=%{gmic_community_commit}; echo ${c:0:7})
 
 
 Summary: GREYC's Magic for Image Computing
 Name: gmic
-Version: 2.8.3
+Version: 2.8.4
 Release: 7%{?dist}
 Source0: https://github.com/dtschump/gmic/archive/%{gmic_commit}.tar.gz#/gmic-%{shortcommit0}.tar.gz 
 #Source0: https://github.com/dtschump/gmic/archive/v.%{version}.tar.gz
@@ -315,6 +330,9 @@ sed -i "s|libgmic.so.1|libgmic.so.${VERSION1}|g" $RPM_BUILD_ROOT/%{_libdir}/cmak
 %{_bindir}/gmic_krita_qt
 
 %changelog
+
+* Tue Feb 11 2020 - David Va <davidva AT tuta DOT io> 2.8.4-7
+- Updated to 2.8.4
 
 * Sat Jan 25 2020 - David Va <davidva AT tuta DOT io> 2.8.3-7
 - Updated to 2.8.3-7
