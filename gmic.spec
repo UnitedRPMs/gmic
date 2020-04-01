@@ -28,22 +28,22 @@
 %bcond_with system_cimg
 
 # Only for test usage
-%global gmic_commit f09bfb3528b245a8dbd9d0a3dae87a1d1020bef0
+%global gmic_commit 601c5af1f0a89e963a6b120686781ed766261d1e
 %global shortcommit0 %(c=%{gmic_commit}; echo ${c:0:7})
 
-%global zart_commit 099554f8bf26c6161cd8c0b7df3d1aedad27e8ec 
+%global zart_commit 7470fddd530f227b9420d9ccbd9132ea3e317bf7
 %global shortcommit1 %(c=%{zart_commit}; echo ${c:0:7})
 
-%global gmic_qt_commit 168e4cc8d429c3ba4069f242090ac36ec94dfc33
+%global gmic_qt_commit 1a939b1e33353beb094a40e4c4be87ffb25bfe66
 %global shortcommit2 %(c=%{gmic_qt_commit}; echo ${c:0:7})
 
-%global gmic_community_commit 9bf625c004a22ae1231db51cf12f072969410688
+%global gmic_community_commit 33b67fa97c005b853ae78dbb69de1471728ee660
 %global shortcommit3 %(c=%{gmic_community_commit}; echo ${c:0:7})
 
 
 Summary: GREYC's Magic for Image Computing
 Name: gmic
-Version: 2.8.4
+Version: 2.9.0
 Release: 7%{?dist}
 Source0: https://github.com/dtschump/gmic/archive/%{gmic_commit}.tar.gz#/gmic-%{shortcommit0}.tar.gz 
 #Source0: https://github.com/dtschump/gmic/archive/v.%{version}.tar.gz
@@ -55,7 +55,7 @@ Source2: https://github.com/c-koi/gmic-qt/archive/%{gmic_qt_commit}.tar.gz#/gmic
 Source3: https://github.com/dtschump/gmic-community/archive/%{gmic_community_commit}.tar.gz#/gmic-community-%{shortcommit3}.tar.gz
 # CImg.h header same version to gmic
 # https://github.com/dtschump/CImg
-Source4: https://raw.githubusercontent.com/dtschump/CImg/9e01d8868613bf31e305044d8e2e9d9f0217f030/CImg.h
+Source4: https://raw.githubusercontent.com/dtschump/CImg/89b9d062ec472df3d33989e6d5d2a8b50ba0775c/CImg.h
 Patch0: zart-opencv4.patch
 Patch1: cmake_fix.patch
 License: (CeCILL or CeCILL-C) and GPLv3+
@@ -330,6 +330,9 @@ sed -i "s|libgmic.so.1|libgmic.so.${VERSION1}|g" $RPM_BUILD_ROOT/%{_libdir}/cmak
 %{_bindir}/gmic_krita_qt
 
 %changelog
+
+* Tue Mar 31 2020 - David Va <davidva AT tuta DOT io> 2.9.0-7
+- Updated to 2.9.0
 
 * Tue Feb 11 2020 - David Va <davidva AT tuta DOT io> 2.8.4-7
 - Updated to 2.8.4
