@@ -18,6 +18,8 @@
 %global basoname %(c=%{soname}; echo ${c:0:1})
 
 %global debug_package %{nil}
+#global _lto_cflags %{nil}
+#define _legacy_common_support 1
 
 
 # We have problems compiling zart in gmic 2.7.5
@@ -28,16 +30,16 @@
 %bcond_with system_cimg
 
 # Only for test usage
-%global gmic_commit 0c98c226a68bd582600eefe5eadd7118410d4c82
+%global gmic_commit 6ec49086be5ba6c55e7fd104da021dd8026acd48
 %global shortcommit0 %(c=%{gmic_commit}; echo ${c:0:7})
 
-%global zart_commit d3a2931b1a07ec0322211f253468000363c4b6cb
+%global zart_commit 9705abe5b7873650f91915096044d30728bc3874
 %global shortcommit1 %(c=%{zart_commit}; echo ${c:0:7})
 
 %global gmic_qt_commit 20846a0cc3a87244eef0cf0d2fb71c7b94c8dccf
 %global shortcommit2 %(c=%{gmic_qt_commit}; echo ${c:0:7})
 
-%global gmic_community_commit 19211e045f3cee9ec6731bc6474bcbef387cbb3e
+%global gmic_community_commit 29c13a5476245d1e7ca40e6a291a4411b57c531e
 %global shortcommit3 %(c=%{gmic_community_commit}; echo ${c:0:7})
 
 
@@ -168,8 +170,7 @@ popd
 
 # Build gmic
 # We are using cmake, reduce build time and resources
-mkdir -p build
-pushd build
+mkdir -p build; pushd build
 cmake \
 		-DCMAKE_INSTALL_PREFIX=/usr \
 		-DCMAKE_INSTALL_LIBDIR=%{_libdir} \
@@ -179,7 +180,7 @@ cmake \
 		-DBUILD_LIB=ON \
 		-DBUILD_LIB_STATIC=OFF \
 		-DBUILD_CLI=ON \
-		-DBUILD_MAN=ON \
+		-DBUILD_MAN=OFF \
 		-DBUILD_BASH_COMPLETION=ON \
 		-DCUSTOM_CFLAGS=ON \
 		-DENABLE_CURL=ON \
@@ -196,22 +197,23 @@ cmake \
 		-DENABLE_ZLIB=ON \
 		-DENABLE_DYNAMIC_LINKING=ON ..
 
-%make_build VERBOSE=0 NOSTRIP=1 -j1
-popd
+%make_build  VERBOSE=0 NOSTRIP=1 -j1
+
 echo 'DONE MAKE'
 
-# Create link for zart dynamic linking
-ln -s ../build/libgmic.so src/libgmic.so 
+# Copy for zart dynamic linking
+cp -f libgmic.so ../src/libgmic.so 
 
-mv -f %{S:4} src/CImg.h
+mv -f %{S:4} ../src/CImg.h
 	
 %if %{with system_cimg}
 # We want to build against the system installed CImg package.
 # G'MIC provides no way todo this, so we just copy the file
 # over what's there already
-mv src/CImg.h src/CImg.h.bak
-cp /usr/include/CImg.h src/CImg.h
+mv ../src/CImg.h ../src/CImg.h.bak
+cp /usr/include/CImg.h ../src/CImg.h
 %endif
+popd
 
   pushd gmic-qt
   %{qmake_qt5} CONFIG+=release GMIC_PATH=../src GMIC_DYNAMIC_LINKING=on HOST=none
@@ -313,7 +315,7 @@ sed -i "s|libgmic.so.1|libgmic.so.${VERSION1}|g" $RPM_BUILD_ROOT/%{_libdir}/cmak
 %{_sysconfdir}/bash_completion.d/gmic
 %{_libdir}/libgmic.so.*
 %{_libdir}/libcgmic.so.*
-%{_mandir}/man1/%{name}.1.gz
+#{_mandir}/man1/%{name}.1.gz
 %{_datadir}/bash-completion/completions/gmic
 
 %files devel

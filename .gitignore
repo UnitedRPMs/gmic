@@ -9,3 +9,4 @@ SRPMS/*
 new/*
 orig/*
 *.rpm
+CImg.h
