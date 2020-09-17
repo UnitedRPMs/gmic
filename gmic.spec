@@ -30,23 +30,23 @@
 %bcond_with system_cimg
 
 # Only for test usage
-%global gmic_commit 6ec49086be5ba6c55e7fd104da021dd8026acd48
+%global gmic_commit c4a2793cd634d8c9a31c013fd46c64099d5e0207
 %global shortcommit0 %(c=%{gmic_commit}; echo ${c:0:7})
 
 %global zart_commit 9705abe5b7873650f91915096044d30728bc3874
 %global shortcommit1 %(c=%{zart_commit}; echo ${c:0:7})
 
-%global gmic_qt_commit 20846a0cc3a87244eef0cf0d2fb71c7b94c8dccf
+%global gmic_qt_commit 97e2c23967c5fcdaad614fcc8836b7c00cc7e662
 %global shortcommit2 %(c=%{gmic_qt_commit}; echo ${c:0:7})
 
-%global gmic_community_commit 29c13a5476245d1e7ca40e6a291a4411b57c531e
+%global gmic_community_commit b96ea9ba6f444a3720b94ea20add5de284bd1413
 %global shortcommit3 %(c=%{gmic_community_commit}; echo ${c:0:7})
 
 
 Summary: GREYC's Magic for Image Computing
 Name: gmic
-Version: 2.9.1
-Release: 8%{?dist}
+Version: 2.9.2
+Release: 7%{?dist}
 Source0: https://github.com/dtschump/gmic/archive/%{gmic_commit}.tar.gz#/gmic-%{shortcommit0}.tar.gz 
 #Source0: https://github.com/dtschump/gmic/archive/v.%{version}.tar.gz
 # GIT archive snapshot of https://github.com/c-koi/zart
@@ -57,7 +57,7 @@ Source2: https://github.com/c-koi/gmic-qt/archive/%{gmic_qt_commit}.tar.gz#/gmic
 Source3: https://github.com/dtschump/gmic-community/archive/%{gmic_community_commit}.tar.gz#/gmic-community-%{shortcommit3}.tar.gz
 # CImg.h header same version to gmic
 # https://github.com/dtschump/CImg
-Source4: https://raw.githubusercontent.com/dtschump/CImg/052a45af8aa1c847f8d2649f5927cbee9b89be7c/CImg.h
+Source4: https://raw.githubusercontent.com/dtschump/CImg/bce9b29198499186921ff9d3c08d1225fc22956b/CImg.h
 #Patch0: zart-opencv4.patch
 #Patch1: cmake_fix.patch
 License: (CeCILL or CeCILL-C) and GPLv3+
@@ -333,6 +333,9 @@ sed -i "s|libgmic.so.1|libgmic.so.${VERSION1}|g" $RPM_BUILD_ROOT/%{_libdir}/cmak
 %{_bindir}/gmic_krita_qt
 
 %changelog
+
+* Mon Sep 14 2020 - David Va <davidva AT tuta DOT io> 2.9.2-7
+- Updated to 2.9.2
 
 * Tue Aug 11 2020 - David Va <davidva AT tuta DOT io> 2.9.1-8
 - Rebuilt for opencv
