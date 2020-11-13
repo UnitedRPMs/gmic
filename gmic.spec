@@ -170,8 +170,8 @@ popd
 
 # Build gmic
 # We are using cmake, reduce build time and resources
-mkdir -p build; pushd build
-cmake \
+mkdir -p %{_target_platform}
+%cmake  -B %{_target_platform} \
 		-DCMAKE_INSTALL_PREFIX=/usr \
 		-DCMAKE_INSTALL_LIBDIR=%{_libdir} \
 		-DCMAKE_VERBOSE_MAKEFILE:BOOL=OFF \
@@ -195,13 +195,14 @@ cmake \
 		-DENABLE_PNG=ON \
 		-DENABLE_TIFF=ON \
 		-DENABLE_ZLIB=ON \
-		-DENABLE_DYNAMIC_LINKING=ON ..
+		-DENABLE_DYNAMIC_LINKING=ON 
 
-%make_build  VERBOSE=0 NOSTRIP=1 -j1
+make -C %{_target_platform} VERBOSE=0 NOSTRIP=1 -j1
 
 echo 'DONE MAKE'
 
 # Copy for zart dynamic linking
+pushd %{_target_platform}
 cp -f libgmic.so ../src/libgmic.so 
 
 mv -f %{S:4} ../src/CImg.h
@@ -238,9 +239,7 @@ popd
 
 %install
 
-pushd build
-%make_install
-popd
+%make_install -C %{_target_platform}
 
 
 pushd src
@@ -286,7 +285,7 @@ ln -sf libcgmic.so.${VERSION1} $RPM_BUILD_ROOT/%{_libdir}/libcgmic.so.1
 ln -sf libcgmic.so.${VERSION1} $RPM_BUILD_ROOT/%{_libdir}/libcgmic.so.%{version}
 
 
-pushd build/resources/
+pushd %{_target_platform}/resources/
 mkdir -p %{buildroot}/%{_sysconfdir}/bash_completion.d/
 cp -f gmic_bashcompletion.sh  %{buildroot}/%{_sysconfdir}/bash_completion.d/gmic
 popd
