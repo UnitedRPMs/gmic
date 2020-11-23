@@ -30,23 +30,23 @@
 %bcond_with system_cimg
 
 # Only for test usage
-%global gmic_commit c4a2793cd634d8c9a31c013fd46c64099d5e0207
+%global gmic_commit d45405e26b9c22222ede3a8a4bc7b2ac355903cc
 %global shortcommit0 %(c=%{gmic_commit}; echo ${c:0:7})
 
-%global zart_commit 9705abe5b7873650f91915096044d30728bc3874
+%global zart_commit 5f454ff852fd3512fc083e37bfe3034236c03a13
 %global shortcommit1 %(c=%{zart_commit}; echo ${c:0:7})
 
-%global gmic_qt_commit 97e2c23967c5fcdaad614fcc8836b7c00cc7e662
+%global gmic_qt_commit 561175256596ffa513d3d23c7f5457631fc05965
 %global shortcommit2 %(c=%{gmic_qt_commit}; echo ${c:0:7})
 
-%global gmic_community_commit b96ea9ba6f444a3720b94ea20add5de284bd1413
+%global gmic_community_commit 4dd417da5635ec6d1d32793690917fb1dd32dd96
 %global shortcommit3 %(c=%{gmic_community_commit}; echo ${c:0:7})
 
 
 Summary: GREYC's Magic for Image Computing
 Name: gmic
-Version: 2.9.2
-Release: 8%{?dist}
+Version: 2.9.3
+Release: 7%{?dist}
 Source0: https://github.com/dtschump/gmic/archive/%{gmic_commit}.tar.gz#/gmic-%{shortcommit0}.tar.gz 
 #Source0: https://github.com/dtschump/gmic/archive/v.%{version}.tar.gz
 # GIT archive snapshot of https://github.com/c-koi/zart
@@ -57,7 +57,7 @@ Source2: https://github.com/c-koi/gmic-qt/archive/%{gmic_qt_commit}.tar.gz#/gmic
 Source3: https://github.com/dtschump/gmic-community/archive/%{gmic_community_commit}.tar.gz#/gmic-community-%{shortcommit3}.tar.gz
 # CImg.h header same version to gmic
 # https://github.com/dtschump/CImg
-Source4: https://raw.githubusercontent.com/dtschump/CImg/bce9b29198499186921ff9d3c08d1225fc22956b/CImg.h
+Source4: https://raw.githubusercontent.com/dtschump/CImg/16f1e3a93453ce750e56e9b78f0b8560bf35028c/CImg.h
 #Patch0: zart-opencv4.patch
 #Patch1: cmake_fix.patch
 License: (CeCILL or CeCILL-C) and GPLv3+
@@ -181,7 +181,7 @@ mkdir -p %{_target_platform}
 		-DBUILD_LIB_STATIC=OFF \
 		-DBUILD_CLI=ON \
 		-DBUILD_MAN=OFF \
-		-DBUILD_BASH_COMPLETION=ON \
+		-DBUILD_BASH_COMPLETION=OFF \
 		-DCUSTOM_CFLAGS=ON \
 		-DENABLE_CURL=ON \
 		-DENABLE_X=ON \
@@ -222,6 +222,8 @@ popd
   %{qmake_qt5} CONFIG+=release GMIC_PATH=../src GMIC_DYNAMIC_LINKING=on HOST=gimp
   %make_build VERBOSE=0
   %{qmake_qt5} CONFIG+=release GMIC_PATH=../src GMIC_DYNAMIC_LINKING=on HOST=krita
+  %make_build VERBOSE=0
+  %{qmake_qt5} CONFIG+=release GMIC_PATH=../src GMIC_DYNAMIC_LINKING=on HOST=digikam
   %make_build VERBOSE=0
   popd
 
@@ -284,14 +286,15 @@ ln -sf libcgmic.so.${VERSION1} $RPM_BUILD_ROOT/%{_libdir}/libcgmic.so.${VERSION0
 ln -sf libcgmic.so.${VERSION1} $RPM_BUILD_ROOT/%{_libdir}/libcgmic.so.1
 ln -sf libcgmic.so.${VERSION1} $RPM_BUILD_ROOT/%{_libdir}/libcgmic.so.%{version}
 
-
+if [ -f %{_target_platform}/resources/gmic_bashcompletion.sh ]; then 
 pushd %{_target_platform}/resources/
 mkdir -p %{buildroot}/%{_sysconfdir}/bash_completion.d/
 cp -f gmic_bashcompletion.sh  %{buildroot}/%{_sysconfdir}/bash_completion.d/gmic
 popd
- 
 # Sourced files shouldn't be executable
 chmod -x %{buildroot}/%{_sysconfdir}/bash_completion.d/gmic
+fi
+
  
 
 # COPYING fix
@@ -311,11 +314,10 @@ sed -i "s|libgmic.so.1|libgmic.so.${VERSION1}|g" $RPM_BUILD_ROOT/%{_libdir}/cmak
 %if !%{with zart}
 %{_bindir}/zart
 %endif
-%{_sysconfdir}/bash_completion.d/gmic
 %{_libdir}/libgmic.so.*
 %{_libdir}/libcgmic.so.*
 #{_mandir}/man1/%{name}.1.gz
-%{_datadir}/bash-completion/completions/gmic
+#{_datadir}/bash-completion/completions/gmic
 
 %files devel
 %{_prefix}/include/gmic.h
@@ -332,6 +334,9 @@ sed -i "s|libgmic.so.1|libgmic.so.${VERSION1}|g" $RPM_BUILD_ROOT/%{_libdir}/cmak
 %{_bindir}/gmic_krita_qt
 
 %changelog
+
+* Wed Nov 18 2020 - David Va <davidva AT tuta DOT io> 2.9.3-7
+- Updated to 2.9.3
 
 * Thu Nov 05 2020 - David Va <davidva AT tuta DOT io> 2.9.2-8
 - Rebuilt for opencv
