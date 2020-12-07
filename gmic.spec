@@ -30,22 +30,22 @@
 %bcond_with system_cimg
 
 # Only for test usage
-%global gmic_commit d45405e26b9c22222ede3a8a4bc7b2ac355903cc
+%global gmic_commit 414b612d157880f2084b3dc7876229fe750515fa
 %global shortcommit0 %(c=%{gmic_commit}; echo ${c:0:7})
 
-%global zart_commit 5f454ff852fd3512fc083e37bfe3034236c03a13
+%global zart_commit a15cd60f535c2cf42ff08e22f33758e4dd6dc6d6
 %global shortcommit1 %(c=%{zart_commit}; echo ${c:0:7})
 
-%global gmic_qt_commit 561175256596ffa513d3d23c7f5457631fc05965
+%global gmic_qt_commit 6ebe0aace907933737a0e34cfbfc37b665498938
 %global shortcommit2 %(c=%{gmic_qt_commit}; echo ${c:0:7})
 
-%global gmic_community_commit 4dd417da5635ec6d1d32793690917fb1dd32dd96
+%global gmic_community_commit f8c8699d5e5fa61a5c36effda4ea34805d831676
 %global shortcommit3 %(c=%{gmic_community_commit}; echo ${c:0:7})
 
 
 Summary: GREYC's Magic for Image Computing
 Name: gmic
-Version: 2.9.3
+Version: 2.9.4
 Release: 7%{?dist}
 Source0: https://github.com/dtschump/gmic/archive/%{gmic_commit}.tar.gz#/gmic-%{shortcommit0}.tar.gz 
 #Source0: https://github.com/dtschump/gmic/archive/v.%{version}.tar.gz
@@ -57,7 +57,7 @@ Source2: https://github.com/c-koi/gmic-qt/archive/%{gmic_qt_commit}.tar.gz#/gmic
 Source3: https://github.com/dtschump/gmic-community/archive/%{gmic_community_commit}.tar.gz#/gmic-community-%{shortcommit3}.tar.gz
 # CImg.h header same version to gmic
 # https://github.com/dtschump/CImg
-Source4: https://raw.githubusercontent.com/dtschump/CImg/16f1e3a93453ce750e56e9b78f0b8560bf35028c/CImg.h
+Source4: https://raw.githubusercontent.com/dtschump/CImg/a0e7ecb55130bdf90756033c1e1470eae4b88c1a/CImg.h
 #Patch0: zart-opencv4.patch
 #Patch1: cmake_fix.patch
 License: (CeCILL or CeCILL-C) and GPLv3+
@@ -334,6 +334,9 @@ sed -i "s|libgmic.so.1|libgmic.so.${VERSION1}|g" $RPM_BUILD_ROOT/%{_libdir}/cmak
 %{_bindir}/gmic_krita_qt
 
 %changelog
+
+* Sat Dec 05 2020 - David Va <davidva AT tuta DOT io> 2.9.4-7
+- Updated to 2.9.4
 
 * Wed Nov 18 2020 - David Va <davidva AT tuta DOT io> 2.9.3-7
 - Updated to 2.9.3
