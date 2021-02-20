@@ -1,7 +1,7 @@
 #
 # spec file for package gmic
 #
-# Copyright (c) 2020 UnitedRPMs.
+# Copyright (c) 2021 UnitedRPMs.
 #
 # All modifications and additions to the file contributed by third parties
 # remain the property of their copyright owners, unless otherwise agreed
@@ -30,22 +30,22 @@
 %bcond_with system_cimg
 
 # Only for test usage
-%global gmic_commit 414b612d157880f2084b3dc7876229fe750515fa
+%global gmic_commit 84dfab879ae48b77dc3145ab5693b4d0127e1269
 %global shortcommit0 %(c=%{gmic_commit}; echo ${c:0:7})
 
-%global zart_commit a15cd60f535c2cf42ff08e22f33758e4dd6dc6d6
+%global zart_commit 939cf381c5871e506aabd066037acf2b55143c1d
 %global shortcommit1 %(c=%{zart_commit}; echo ${c:0:7})
 
-%global gmic_qt_commit 6ebe0aace907933737a0e34cfbfc37b665498938
+%global gmic_qt_commit d5eea067f1d8ba86c310f8a385886143e178f614
 %global shortcommit2 %(c=%{gmic_qt_commit}; echo ${c:0:7})
 
-%global gmic_community_commit f8c8699d5e5fa61a5c36effda4ea34805d831676
+%global gmic_community_commit cf0aa0050ab61c55d937c70b0365341150d1b879
 %global shortcommit3 %(c=%{gmic_community_commit}; echo ${c:0:7})
 
 
 Summary: GREYC's Magic for Image Computing
 Name: gmic
-Version: 2.9.4
+Version: 2.9.6
 Release: 7%{?dist}
 Source0: https://github.com/dtschump/gmic/archive/%{gmic_commit}.tar.gz#/gmic-%{shortcommit0}.tar.gz 
 #Source0: https://github.com/dtschump/gmic/archive/v.%{version}.tar.gz
@@ -57,7 +57,7 @@ Source2: https://github.com/c-koi/gmic-qt/archive/%{gmic_qt_commit}.tar.gz#/gmic
 Source3: https://github.com/dtschump/gmic-community/archive/%{gmic_community_commit}.tar.gz#/gmic-community-%{shortcommit3}.tar.gz
 # CImg.h header same version to gmic
 # https://github.com/dtschump/CImg
-Source4: https://raw.githubusercontent.com/dtschump/CImg/a0e7ecb55130bdf90756033c1e1470eae4b88c1a/CImg.h
+Source4: https://raw.githubusercontent.com/dtschump/CImg/a5af3d101aa231bb8f8285f8d894758c7da3ccf1/CImg.h
 #Patch0: zart-opencv4.patch
 #Patch1: cmake_fix.patch
 License: (CeCILL or CeCILL-C) and GPLv3+
@@ -334,6 +334,9 @@ sed -i "s|libgmic.so.1|libgmic.so.${VERSION1}|g" $RPM_BUILD_ROOT/%{_libdir}/cmak
 %{_bindir}/gmic_krita_qt
 
 %changelog
+
+* Mon Feb 15 2021 - David Va <davidva AT tuta DOT io> 2.9.6-7
+- Updated to 2.9.6
 
 * Sat Dec 05 2020 - David Va <davidva AT tuta DOT io> 2.9.4-7
 - Updated to 2.9.4
