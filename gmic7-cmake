@@ -18,8 +18,8 @@
 %global basoname %(c=%{soname}; echo ${c:0:1})
 
 %global debug_package %{nil}
-%global _lto_cflags %{nil}
-%define _legacy_common_support 1
+#global _lto_cflags %{nil}
+#define _legacy_common_support 1
 
 
 # We have problems compiling zart in gmic 2.7.5
@@ -27,11 +27,7 @@
 %bcond_with zart
 
 # Conditional system cimg
-%if 0%{?fedora} <= 31
-%bcond_with system_cimg
-%else
 %bcond_without system_cimg
-%endif
 
 # Only for test usage
 %global gmic_commit 19fd316de24777459778ce58783a1910f773b206
@@ -61,9 +57,9 @@ Source2: https://github.com/c-koi/gmic-qt/archive/%{gmic_qt_commit}.tar.gz#/gmic
 Source3: https://github.com/dtschump/gmic-community/archive/%{gmic_community_commit}.tar.gz#/gmic-community-%{shortcommit3}.tar.gz
 # CImg.h header same version to gmic
 # https://github.com/dtschump/CImg
-#Source4: https://raw.githubusercontent.com/dtschump/CImg/c0becdf881b0f3e2445975cac01c2422170d1fd9/CImg.h
 Source4: https://raw.githubusercontent.com/dtschump/CImg/c0becdf881b0f3e2445975cac01c2422170d1fd9/CImg.h
-Patch:	gmic-2.9.1-optflags.patch
+Patch0: clang-compat.txt
+#Patch1: cmake_fix.patch
 License: (CeCILL or CeCILL-C) and GPLv3+
 Url: http://gmic.eu/
 %if %{with system_cimg}
@@ -71,7 +67,7 @@ BuildRequires: CImg-devel
 %endif
 BuildRequires: libX11-devel
 BuildRequires: libXext-devel
-#BuildRequires: libtiff-devel
+BuildRequires: libtiff-devel
 BuildRequires: libpng-devel
 BuildRequires: libjpeg-devel
 BuildRequires: fftw-devel
@@ -92,24 +88,7 @@ BuildRequires: bash-completion
 BuildRequires: libxkbcommon-devel
 BuildRequires: wget
 BuildRequires: dos2unix
-BuildRequires:  cmake(Qt5Core)
-BuildRequires:  cmake(Qt5Gui)
-BuildRequires:  cmake(Qt5LinguistTools)
-BuildRequires:  cmake(Qt5Network)
-BuildRequires:  cmake(Qt5Widgets)
-BuildRequires:  cmake(Qt5Xml)
-
-BuildRequires:  pkgconfig(GraphicsMagick++)
-BuildRequires:  pkgconfig(OpenEXR)
-BuildRequires:  pkgconfig(fftw3)
-BuildRequires:  pkgconfig(gimp-2.0)
-BuildRequires:  pkgconfig(libcurl)
-BuildRequires:  pkgconfig(libjpeg)
-BuildRequires:  pkgconfig(libpng)
-BuildRequires:  pkgconfig(libtiff-4)
-BuildRequires:  pkgconfig(zlib)
-
-
+BuildRequires: clang
 # The C library binding was mistakenly put in a -static
 # package despite being a shared library
 Obsoletes: gmic-static <= 2.1.8
@@ -160,63 +139,65 @@ mv -f gmic-qt-%{gmic_qt_commit} gmic-qt
 mv -f gmic-community-%{gmic_community_commit} gmic-community
 
 #patches
-%patch -p1
+%patch0 -p1
+#patch1 -p1
 
 # fixes
 dos2unix src/Makefile
-
-# fix libdir
-sed 's|\$(USR)/\$(LIB)/|$(USR)/%_lib/|' src/Makefile
-# fix libcgmic path
-sed 's| \.\.\/\(\.\.\/gmic-community/libcgmic\)| \1|' src/Makefile
-#%ifnarch %ix86 x86_64
-#sed 's|-mtune=generic||' src/Makefile
-#%endif
 
 
 #-------- opencv 4 fix--------
 # for zart
 sed -e 's|opencv|opencv4|' -i zart/zart.pro
-rm -f zart/.qmake.stash
+#rm -f zart/.qmake.stash
 
 
 # fix overlinking
-sed -e 's/pkg-config opencv --libs ||//' -e 's/-lopencv_highgui/-lopencv_videoio/' \
+#sed -e 's/pkg-config opencv --libs ||//' -e 's/-lopencv_highgui/-lopencv_videoio/' \
       -e 's/pkg-config opencv/pkg-config opencv4/' -i src/Makefile   
 #------------------------------
 
 # qmake fix
 sed -i 's|QMAKE = qmake|QMAKE = qmake-qt5|g' src/Makefile
 
-# remove stash-file (thanks Wolfgang Lieff <Wolfgang.Lieff@airborneresearch.org.au>)
-rm -f zart/.qmake.stash
-
 %build
-
 
 pushd src
 
 ln -fs ../gmic-community/libcgmic/gmic_libc.cpp .
 ln -fs ../gmic-community/libcgmic/gmic_libc.h .
 ln -fs ../gmic-community/libcgmic/use_libcgmic.c .
+popd
 
+# Build gmic
+# We are using cmake, reduce build time and resources
+mkdir -p %{_target_platform}
+%cmake  -B %{_target_platform} \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=%{_libdir} \
+		-DBUILD_LIB_STATIC=OFF \
+		-DENABLE_CURL=OFF \
+		-DENABLE_DYNAMIC_LINKING=ON
+
+make -C %{_target_platform} VERBOSE=0 NOSTRIP=1 -j1
+
+echo 'DONE MAKE'
+
+# Copy for zart dynamic linking
+pushd %{_target_platform}
+cp -f libgmic.so ../src/libgmic.so 
+
+mv -f %{S:4} ../src/CImg.h
+	
 %if %{with system_cimg}
 # We want to build against the system installed CImg package.
 # G'MIC provides no way todo this, so we just copy the file
 # over what's there already
-#mv CImg.h CImg.h.bak
-cp -f /usr/include/CImg.h CImg.h
-%else
-mv -f %{S:4} .
-echo 'CImg from URL'
+mv ../src/CImg.h ../src/CImg.h.bak
+cp /usr/include/CImg.h ../src/CImg.h
 %endif
-
-
-make LIB=lib64 OPT_CFLAGS="-O2 -fPIC -fno-fast-math" cli lib libc 
 popd
 
-echo 'DONE MAKE'
-	export CCACHE_DISABLE=1
   pushd gmic-qt
   %{qmake_qt5} CONFIG+=release GMIC_PATH=../src GMIC_DYNAMIC_LINKING=on HOST=none
   %make_build VERBOSE=0
@@ -230,7 +211,6 @@ echo 'DONE MAKE'
 
 %if !%{with zart}
   pushd zart
-  unset CXXFLAGS 
   %{qmake_qt5} CONFIG+=release GMIC_PATH=../src zart.pro 
   %make_build VERBOSE=0
   popd
@@ -243,7 +223,7 @@ popd
 
 %install
 
-%make_install -C src LIB=lib64 USR="/usr"
+%make_install -C %{_target_platform}
 
 
 pushd src
@@ -252,7 +232,7 @@ VERSION1=$(grep 'gmic_version\ ' gmic.h | tail -c4 | head -c1)
 VERSION2=$(grep 'gmic_version\ ' gmic.h | tail -c3 | head -c1)
 VERSION3=$(grep 'gmic_version\ ' gmic.h | tail -c2 | head -c1)
 
-# symlink
+# Soname of cmake? why so.1?
 cp -f libgmic.so %{buildroot}/%{_libdir}/libgmic.so.${VERSION1}
 cp -f libcgmic.so %{buildroot}/%{_libdir}/libcgmic.so.${VERSION1}
 
@@ -277,6 +257,17 @@ install -Dm755 gmic_qt %{buildroot}/usr/bin/
 install -Dm755 gmic_krita_qt %{buildroot}/usr/bin/
 popd
 
+# symlinks for compatibility for the library
+ln -sf libgmic.so.${VERSION1} $RPM_BUILD_ROOT/%{_libdir}/libgmic.so
+ln -sf libgmic.so.${VERSION1} $RPM_BUILD_ROOT/%{_libdir}/libgmic.so.${VERSION0}
+ln -sf libgmic.so.${VERSION1} $RPM_BUILD_ROOT/%{_libdir}/libgmic.so.1
+ln -sf libgmic.so.${VERSION1} $RPM_BUILD_ROOT/%{_libdir}/libgmic.so.%{version}
+
+ln -sf libcgmic.so.${VERSION1} $RPM_BUILD_ROOT/%{_libdir}/libcgmic.so
+ln -sf libcgmic.so.${VERSION1} $RPM_BUILD_ROOT/%{_libdir}/libcgmic.so.${VERSION0}
+ln -sf libcgmic.so.${VERSION1} $RPM_BUILD_ROOT/%{_libdir}/libcgmic.so.1
+ln -sf libcgmic.so.${VERSION1} $RPM_BUILD_ROOT/%{_libdir}/libcgmic.so.%{version}
+
 if [ -f %{_target_platform}/resources/gmic_bashcompletion.sh ]; then 
 pushd %{_target_platform}/resources/
 mkdir -p %{buildroot}/%{_sysconfdir}/bash_completion.d/
@@ -293,7 +284,7 @@ mv $PWD/gmic-community/libcgmic/COPYING COPYING-libcgmic
 mv $PWD/gmic-qt/COPYING COPYING-gmic-qt 
 
 # cmake fix, using the correct soname for the release
-#sed -i "s|libgmic.so.1|libgmic.so.${VERSION1}|g" $RPM_BUILD_ROOT/%{_libdir}/cmake/gmic/GmicTargets-release.cmake
+sed -i "s|libgmic.so.1|libgmic.so.${VERSION1}|g" $RPM_BUILD_ROOT/%{_libdir}/cmake/gmic/GmicTargets-release.cmake
 
 %ldconfig_scriptlets
 
@@ -309,19 +300,13 @@ mv $PWD/gmic-qt/COPYING COPYING-gmic-qt
 %{_libdir}/libcgmic.so.*
 #{_mandir}/man1/%{name}.1.gz
 #{_datadir}/bash-completion/completions/gmic
-%{_datadir}/applications/gmic_qt.desktop
-%{_datadir}/applications/zart.desktop
-%{_datadir}/icons/hicolor/48x48/apps/gmic_qt.png
-%{_datadir}/icons/hicolor/48x48/apps/zart.png
-%{_datadir}/icons/hicolor/scalable/apps/gmic_qt.svg
-%{_datadir}/icons/hicolor/scalable/apps/zart.svg
-
 
 %files devel
 %{_prefix}/include/gmic.h
 %{_prefix}/include/gmic_libc.h
 %{_libdir}/libgmic.so
 %{_libdir}/libcgmic.so
+%{_libdir}/cmake/gmic/*.cmake
 
 %files gimp
 %{gimpplugindir}/gmic_gimp_qt

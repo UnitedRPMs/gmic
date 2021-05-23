@@ -1,0 +1,25 @@
+Index: gmic-2.9.1/src/Makefile
+===================================================================
+--- a/src/Makefile	2020-06-10 15:43:15.000000000 +0200
++++ b/src/Makefile	2020-07-12 10:09:52.581651551 +0200
+@@ -190,20 +190,6 @@ ifeq ($(OS),Windows)
+ MANDATORY_LIBS += -Wl,--stack,16777216
+ endif
+ 
+-# Enable optimizations for 'cli'.
+-FLTO = -flto
+-OPT_CLI_CFLAGS = -Ofast
+-ifdef IS_GCC
+-OPT_CLI_CFLAGS = -Ofast -mtune=generic $(FLTO)
+-OPT_CLI_LIBS = $(FLTO)
+-endif
+-ifdef icpc
+-OPT_CLI_CFLAGS = -fast
+-endif
+-
+-# Enable optimizations for other targets.
+-OPT_CFLAGS = -O2
+-
+ # Enable multi-threading support.
+ PARALLEL_CFLAGS = -Dgmic_is_parallel
+ ifneq ($(OS),Windows)
