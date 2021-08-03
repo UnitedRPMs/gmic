@@ -34,22 +34,22 @@
 %endif
 
 # Only for test usage
-%global gmic_commit 19fd316de24777459778ce58783a1910f773b206
+%global gmic_commit 75230c9997bd49102e64ebf2578efe30ae4b3030
 %global shortcommit0 %(c=%{gmic_commit}; echo ${c:0:7})
 
 %global zart_commit 939cf381c5871e506aabd066037acf2b55143c1d
 %global shortcommit1 %(c=%{zart_commit}; echo ${c:0:7})
 
-%global gmic_qt_commit 56a0658079462af95b17af5cb2fd50ebbad74792
+%global gmic_qt_commit da87d71036b62e884a1591f12dc2f361026d85e2
 %global shortcommit2 %(c=%{gmic_qt_commit}; echo ${c:0:7})
 
-%global gmic_community_commit a593c97a914053eb6d23a608804555b0a03973d4
+%global gmic_community_commit 7d77176ea12891d7b468d544dcdbf38e23d8d46f
 %global shortcommit3 %(c=%{gmic_community_commit}; echo ${c:0:7})
 
 
 Summary: GREYC's Magic for Image Computing
 Name: gmic
-Version: 2.9.7
+Version: 2.9.8
 Release: 7%{?dist}
 Source0: https://github.com/dtschump/gmic/archive/%{gmic_commit}.tar.gz#/gmic-%{shortcommit0}.tar.gz 
 #Source0: https://github.com/dtschump/gmic/archive/v.%{version}.tar.gz
@@ -61,9 +61,11 @@ Source2: https://github.com/c-koi/gmic-qt/archive/%{gmic_qt_commit}.tar.gz#/gmic
 Source3: https://github.com/dtschump/gmic-community/archive/%{gmic_community_commit}.tar.gz#/gmic-community-%{shortcommit3}.tar.gz
 # CImg.h header same version to gmic
 # https://github.com/dtschump/CImg
-#Source4: https://raw.githubusercontent.com/dtschump/CImg/c0becdf881b0f3e2445975cac01c2422170d1fd9/CImg.h
-Source4: https://raw.githubusercontent.com/dtschump/CImg/c0becdf881b0f3e2445975cac01c2422170d1fd9/CImg.h
+Source4: https://raw.githubusercontent.com/dtschump/CImg/1258803c0b2d1756b600a225d40f76401bc25ea2/CImg.h
 Patch:	gmic-2.9.1-optflags.patch
+Patch1: gmic-openexr3.patch
+#Patch1: file.patch
+Patch2: cimg_OpenEXR.patch
 License: (CeCILL or CeCILL-C) and GPLv3+
 Url: http://gmic.eu/
 %if %{with system_cimg}
@@ -75,7 +77,6 @@ BuildRequires: libXext-devel
 BuildRequires: libpng-devel
 BuildRequires: libjpeg-devel
 BuildRequires: fftw-devel
-BuildRequires: OpenEXR-devel
 BuildRequires: zlib-devel
 BuildRequires: gimp-devel-tools
 BuildRequires: hdf5-devel
@@ -92,6 +93,12 @@ BuildRequires: bash-completion
 BuildRequires: libxkbcommon-devel
 BuildRequires: wget
 BuildRequires: dos2unix
+%if 0%{?fedora} <= 34
+BuildRequires:  OpenEXR-devel
+%else
+BuildRequires:  openexr-devel
+BuildRequires:  imath-devel
+%endif
 BuildRequires:  cmake(Qt5Core)
 BuildRequires:  cmake(Qt5Gui)
 BuildRequires:  cmake(Qt5LinguistTools)
@@ -100,7 +107,6 @@ BuildRequires:  cmake(Qt5Widgets)
 BuildRequires:  cmake(Qt5Xml)
 
 BuildRequires:  pkgconfig(GraphicsMagick++)
-BuildRequires:  pkgconfig(OpenEXR)
 BuildRequires:  pkgconfig(fftw3)
 BuildRequires:  pkgconfig(gimp-2.0)
 BuildRequires:  pkgconfig(libcurl)
@@ -161,6 +167,10 @@ mv -f gmic-community-%{gmic_community_commit} gmic-community
 
 #patches
 %patch -p1
+%if 0%{?fedora} >= 35
+%patch1 -p1
+%endif
+%patch2 -p1 -d %{_sourcedir}
 
 # fixes
 dos2unix src/Makefile
@@ -206,6 +216,10 @@ ln -fs ../gmic-community/libcgmic/use_libcgmic.c .
 # over what's there already
 #mv CImg.h CImg.h.bak
 cp -f /usr/include/CImg.h CImg.h
+%if 0%{?fedora} >= 35
+sed 's|"ImfRgbaFile.h"|"OpenEXR/ImfRgbaFile.h"|' CImg.h
+%endif
+echo 'CImg from System'
 %else
 mv -f %{S:4} .
 echo 'CImg from URL'

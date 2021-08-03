@@ -1,0 +1,11 @@
+--- a/CImg.h	2021-08-01 00:55:21.990259906 -0600
++++ b/CImg_new.h	2021-08-01 00:49:54.669464000 -0600
+@@ -581,7 +581,7 @@
+ #pragma GCC diagnostic ignored "-Wdeprecated-copy"
+ #pragma GCC diagnostic ignored "-Wshadow"
+ #endif
+-#include "ImfRgbaFile.h"
++#include "OpenEXR/ImfRgbaFile.h"
+ #include "ImfInputFile.h"
+ #include "ImfChannelList.h"
+ #include "ImfMatrixAttribute.h"
