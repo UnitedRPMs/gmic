@@ -346,6 +346,9 @@ mv $PWD/gmic-qt/COPYING COPYING-gmic-qt
 
 %changelog
 
+* Sun Aug 01 2021 - David Va <davidva AT tuta DOT io> 2.9.8-7
+- Updated to 2.9.8
+
 * Sat Apr 17 2021 - David Va <davidva AT tuta DOT io> 2.9.7-7
 - Updated to 2.9.7
 
