@@ -27,29 +27,26 @@
 %bcond_with zart
 
 # Conditional system cimg
-%if 0%{?fedora} <= 31
 %bcond_with system_cimg
-%else
-%bcond_without system_cimg
-%endif
+
 
 # Only for test usage
-%global gmic_commit 75230c9997bd49102e64ebf2578efe30ae4b3030
+%global gmic_commit 6be0a89816e35ecb169afe739c2f35d1dc94defd
 %global shortcommit0 %(c=%{gmic_commit}; echo ${c:0:7})
 
 %global zart_commit 939cf381c5871e506aabd066037acf2b55143c1d
 %global shortcommit1 %(c=%{zart_commit}; echo ${c:0:7})
 
-%global gmic_qt_commit da87d71036b62e884a1591f12dc2f361026d85e2
+%global gmic_qt_commit 1c181e0e903760ba6e82cfdc754e1586854bd6ac
 %global shortcommit2 %(c=%{gmic_qt_commit}; echo ${c:0:7})
 
-%global gmic_community_commit 7d77176ea12891d7b468d544dcdbf38e23d8d46f
+%global gmic_community_commit 03869cb264cfbb5cc1cf5d7cde55f2fe0dbb99cd
 %global shortcommit3 %(c=%{gmic_community_commit}; echo ${c:0:7})
 
 
 Summary: GREYC's Magic for Image Computing
 Name: gmic
-Version: 2.9.8
+Version: 2.9.9
 Release: 7%{?dist}
 Source0: https://github.com/dtschump/gmic/archive/%{gmic_commit}.tar.gz#/gmic-%{shortcommit0}.tar.gz 
 #Source0: https://github.com/dtschump/gmic/archive/v.%{version}.tar.gz
@@ -61,7 +58,7 @@ Source2: https://github.com/c-koi/gmic-qt/archive/%{gmic_qt_commit}.tar.gz#/gmic
 Source3: https://github.com/dtschump/gmic-community/archive/%{gmic_community_commit}.tar.gz#/gmic-community-%{shortcommit3}.tar.gz
 # CImg.h header same version to gmic
 # https://github.com/dtschump/CImg
-Source4: https://raw.githubusercontent.com/dtschump/CImg/1258803c0b2d1756b600a225d40f76401bc25ea2/CImg.h
+Source4: https://raw.githubusercontent.com/dtschump/CImg/b33dcc8f9f1acf1f276ded92c04f8231f6c23fcd/CImg.h
 Patch:	gmic-2.9.1-optflags.patch
 Patch1: gmic-openexr3.patch
 #Patch1: file.patch
@@ -225,12 +222,15 @@ mv -f %{S:4} .
 echo 'CImg from URL'
 %endif
 
-
+export CC=gcc
+export CXX=g++
 make LIB=lib64 OPT_CFLAGS="-O2 -fPIC -fno-fast-math" cli lib libc 
 popd
 
 echo 'DONE MAKE'
 	export CCACHE_DISABLE=1
+	export CC=gcc
+        export CXX=g++
   pushd gmic-qt
   %{qmake_qt5} CONFIG+=release GMIC_PATH=../src GMIC_DYNAMIC_LINKING=on HOST=none
   %make_build VERBOSE=0
@@ -252,6 +252,8 @@ echo 'DONE MAKE'
 
 # build libc
 pushd src  
+export CC=gcc
+export CXX=g++
 %make_build libc NOSTRIP=1
 popd
 
@@ -345,6 +347,9 @@ mv $PWD/gmic-qt/COPYING COPYING-gmic-qt
 %{_bindir}/gmic_krita_qt
 
 %changelog
+
+* Fri Sep 10 2021 - David Va <davidva AT tuta DOT io> 2.9.9-7
+- Updated to 2.9.9
 
 * Sun Aug 01 2021 - David Va <davidva AT tuta DOT io> 2.9.8-7
 - Updated to 2.9.8
